@@ -26,6 +26,8 @@ node_modules
 package-lock.json
 env.json.devel
 
+apihub-root/external-volume/apihub.json
+
 
 
 acdc-authentication-feature-template/

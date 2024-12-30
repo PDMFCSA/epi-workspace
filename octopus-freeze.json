@@ -164,6 +164,15 @@
                     "cmd": "cd dsu-fabric-ssapp && npm install"
                 }
             ]
+        },    
+        {
+            "name": "setup-secret",
+            "actions": [
+            {
+                "type": "execute",
+                "cmd": "jq --arg newSecret \"$(cat .ssotoken)\" '.oauthConfig.client.clientSecret = $newSecret' apihub-root/external-volume/config/apihub.json > temp.json && mv temp.json apihub-root/external-volume/config/apihub.json"
+            }
+            ]
         }
     ],
     "patch": [
