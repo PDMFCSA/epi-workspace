@@ -169,7 +169,7 @@
           },
           {
             "type": "execute",
-            "cmd": "jq --arg newSecret \"$(cat .ssotoken)\" '.oauthConfig.client.clientSecret = $newSecret' apihub-root/external-volume/config/apihub.json > temp.json && mv temp.json apihub-root/external-volume/config/apihub.json"
+            "cmd": "sed -i.bak -E \"s|(\\\"clientSecret\\\":\\s*)\\\"[^\\\"]*\\\"|\\1\\\"$(cat .ssotoken)\\\"|\" apihub-root/external-volume/config/apihub.json"
           }
         ]
       }
