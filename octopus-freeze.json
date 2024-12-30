@@ -102,6 +102,23 @@
                     "tag": "v1.0.2"
                 }
             ]
+        },
+        {
+            "name": "setup-secret",
+            "actions": [
+              {
+                "type": "copy",
+                "src": "./apihub-root/external-volume/config/base-apihub.json",
+                "target": "./apihub-root/external-volume/config/apihub.json",
+                "options": {
+                  "overwrite": true
+                }
+              },
+              {
+                "type": "execute",
+                "cmd": "sed -i -E \"s|(\\\"clientSecret\\\":\\s*)\\\"[^\\\"]*\\\"|\\1\\\"$(cat .ssotoken)\\\"|\" apihub-root/external-volume/config/apihub.json"
+              }
+            ]
         }
     ],
     "patch": [
