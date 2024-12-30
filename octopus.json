@@ -169,7 +169,7 @@
           },
           {
             "type": "execute",
-            "cmd": "sed -i.bak -E \"s|(\\\"clientSecret\\\":\\s*)\\\"[^\\\"]*\\\"|\\1\\\"$(cat .ssotoken)\\\"|\" apihub-root/external-volume/config/apihub.json"
+            "cmd": "sed -i -E \"s|(\\\"clientSecret\\\":\\s*)\\\"[^\\\"]*\\\"|\\1\\\"$(cat .ssotoken)\\\"|\" apihub-root/external-volume/config/apihub.json"
           }
         ]
       }
