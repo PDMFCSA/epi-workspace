@@ -160,6 +160,14 @@
         "name": "setup-secret",
         "actions": [
           {
+            "type": "copy",
+            "src": "./apihub-root/external-volume/config/base-apihub.json",
+            "target": "./apihub-root/external-volume/config/apihub.json",
+            "options": {
+              "overwrite": true
+            }
+          },
+          {
             "type": "execute",
             "cmd": "jq --arg newSecret \"$(cat .ssotoken)\" '.oauthConfig.client.clientSecret = $newSecret' apihub-root/external-volume/config/apihub.json > temp.json && mv temp.json apihub-root/external-volume/config/apihub.json"
           }
