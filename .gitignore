@@ -26,6 +26,15 @@ node_modules
 package-lock.json
 env.json.devel
 
+
+apihub-root/external-volume/cache/
+apihub-root/external-volume/encryption-keys/
+apihub-root/external-volume/fixed-urls/
+apihub-root/external-volume/gtinOwner/
+apihub-root/external-volume/lightDB/
+apihub-root/external-volume/mq_JWT_Auth_Seeder
+apihub-root/external-volume/secrets/
+apihub-root/initialEncryptionTest
 apihub-root/external-volume/config/apihub.json
 .ssotoken
 
