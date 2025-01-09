@@ -1,5 +1,5 @@
 const fs = require('fs');
-const path = requrie('path');
+const path = require('path');
 
 const apihubJsonPath = "apihub-root/external-volume/config/apihub.json"
 const ssoTokenPath = path.join(process.cwd(), ".ssotoken");
