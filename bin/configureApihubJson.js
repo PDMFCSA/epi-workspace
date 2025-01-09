@@ -38,6 +38,9 @@ function configureApiHubJson(){
         
         const jsonData = JSON.parse(updatedJsonString)
 
+        jsonData["oauthConfig"]["client"]["postLogoutRedirectUrl"] = "http://localhost:8080/?logout=true"
+        jsonData["oauthConfig"]["client"]["redirectPath"] = "http://localhost:8080/?root=true"
+
         fs.writeFileSync(apihubJsonPath, JSON.stringify(jsonData, null, 2), 'utf8');
         console.log(`Successfully updated apihub.json`);
     } catch (error) {
