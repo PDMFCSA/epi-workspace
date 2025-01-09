@@ -108,14 +108,6 @@
               },
               {
                 "type": "execute",
-                "cmd": "[ -f .ssotokenskip ] && echo \".ssotoken file detected configuring apihub.json wiht local configs\" || echo \".ssotoken file not detected configuring apihub.json wiht environment variables\""
-              },
-              {
-                "type": "execute",
-                "cmd": "[ -f .ssotokenskip ] && sed -i -E \"s|(\\\"clientSecret\\\":\\s*)\\\"[^\\\"]*\\\"|\\1\\\"$(cat .ssotoken)\\\"|\" apihub-root/external-volume/config/apihub.json"
-              },
-              {
-                "type": "execute",
                 "cmd": "[ -f .ssotoken ] && node ./bin/configureApihubJson.js"
               }
             ]
