@@ -52,8 +52,10 @@ export class WaitingAccessModal {
 
         let appManager = AppManager.getInstance();
 
+        let infoModal;
+        
         try {
-            let infoModal = await webSkel.showModal("info-modal", {
+            infoModal = await webSkel.showModal("info-modal", {
                 title: "Info",
                 content: "Your break glass recovery code is being processed. Please wait for the access to be granted."
             });
@@ -65,6 +67,9 @@ export class WaitingAccessModal {
             infoModal.remove();
             webSkel.closeModal(target);
         } catch (err) {
+            infoModal.close();
+            infoModal.remove();
+            webSkel.closeModal(target);
             webSkel.getClosestParentElement(target, "dialog").style.display = "";
             webSkel.notificationHandler.reportUserRelevantError("Failed to use the Break Glass Code! Check the value that you entered and try again.");
             return;
