@@ -67,8 +67,10 @@ export class WaitingAccessModal {
             infoModal.remove();
             webSkel.closeModal(target);
         } catch (err) {
-            infoModal.close();
-            infoModal.remove();
+            if(!!infoModal) {
+                infoModal.close();
+                infoModal.remove();
+            }
             webSkel.closeModal(target);
             webSkel.getClosestParentElement(target, "dialog").style.display = "";
             webSkel.notificationHandler.reportUserRelevantError("Failed to use the Break Glass Code! Check the value that you entered and try again.");
