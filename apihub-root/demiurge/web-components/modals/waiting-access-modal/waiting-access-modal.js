@@ -62,7 +62,14 @@ export class WaitingAccessModal {
             });
             webSkel.getClosestParentElement(target, "dialog").style.display = "none"
             lockId = await getLock(recoveryKey, 30*1000, 5, 1000);
-            await appManager.useBreakGlassCode(recoveryKey); 
+
+            if(!lockId){
+                webSkel.getClosestParentElement(target, "dialog").style.display = "";
+                webSkel.notificationHandler.reportUserRelevantError("Somebody else is editing right now. Try again later!");
+                return;
+            }
+
+            await appManager.useBreakGlassCode(recoveryKey);
         } catch (err) {
             webSkel.getClosestParentElement(target, "dialog").style.display = "";
             webSkel.notificationHandler.reportUserRelevantError("Failed to use the Break Glass Code! Check the value that you entered and try again.");
