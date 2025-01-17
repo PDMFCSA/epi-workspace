@@ -8,6 +8,12 @@ const path = require('path');
  * ATENTION THIS FUNCTION IS DANGEROUS IF METHODS WITH THE SAME NAME EXISTE IT WILL REPLACE THEM ALL
  * 
  * 
+ * Matches functon functioname(any params) {
+ *  body
+ * }  
+ * 
+ * The last bracket should be alone in the line only optionaly containing spaces
+ * 
  */
 
 /**
@@ -20,10 +26,11 @@ function replaceFunctionInFile(filePath, functionName, newFunction) {
     // Read the file contents
     let fileContent = fs.readFileSync(filePath, 'utf8');
 
-    // Create a regular expression to find the function
+  
+    // Create a regex pattern to capture the full function definition
     const functionRegex = new RegExp(
-        `function\\s+${functionName}\\s*\\([^)]*\\)\\s*{[^]*?}`, // Matches the function definition (multiline safe)
-        'g'
+        `function\\s+${functionName}\\s*\\([^)]*\\)\\s*{[^]*?[^\\s]}\\s*$`,
+        'gm'
     );
 
     // Replace the old function with the new one
