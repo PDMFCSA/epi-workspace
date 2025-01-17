@@ -1,5 +1,6 @@
 import {changeSidebarFromURL, createObservableObject, navigateToPage} from "../../../utils/utils.js";
 import {CommonPresenterClass} from "../../CommonPresenterClass.js";
+import constants from "../../../constants.js";
 
 export class ManageProductPage extends CommonPresenterClass {
     constructor(element, invalidate) {
@@ -23,7 +24,6 @@ export class ManageProductPage extends CommonPresenterClass {
                 productPayload, productPhotoPayload, EPIs,
             } = await webSkel.appServices.getProductData(params["product-code"]);
 
-            console.log("productPayload=", productPayload, "epis=", EPIs);
             let productModel = webSkel.appServices.createNewProduct(productPayload, productPhotoPayload, EPIs);
             if (!productModel.photo.startsWith("data:image")) {
                 productModel.photo = "./assets/images/no-picture.png";
@@ -31,6 +31,7 @@ export class ManageProductPage extends CommonPresenterClass {
             //save initial state
             this.existingProduct = JSON.parse(JSON.stringify(productModel));
             //observe changes for diffs
+
             this.productData = createObservableObject(productModel, this.onChange.bind(this));
         } else {
             this.buttonName = "Save Product";
@@ -99,8 +100,12 @@ export class ManageProductPage extends CommonPresenterClass {
         });
         let productCode = this.element.querySelector("#productCode");
         for (const key of webSkel.appServices.productInputFieldNames()) {
-            let input = this.element.querySelector(`#${key}`)
-            input.value = this.productData[key] || "";
+            let input = this.element.querySelector(`#${key}`);
+            if(input.type === 'checkbox' && input.name === 'productRecall') {
+                input.checked = this.productData[key];
+            } else {
+                input.value = this.productData[key] || "";
+            }
         }
 
         this.element.querySelectorAll(".epi-market-tabs button.epi-market-button").forEach(item => {
@@ -165,8 +170,9 @@ export class ManageProductPage extends CommonPresenterClass {
     }
 
     detectInputChange(event) {
-        let inputName = event.target.name;
-        this.productData[inputName] = event.target.value;
+        const {name, type, value, checked} = event.target;
+        this.productData[name] = (type === 'checkbox' && name === 'productRecall') ?
+        checked : value;
     }
 
     validateProductCode(input) {

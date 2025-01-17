@@ -43,7 +43,7 @@
                 </div>
                 <input userRights="$$userRights" type="text" class="text-input" name="packagingSiteName"
                        id="packagingSiteName" autocomplete="off"
-                       placeholder="Add site name" value="$$packagingSiteName" data-condition="otherFieldsCondition">
+                       placeholder="Add site name" value="$$packagingSiteName" data-condition="otherFieldsCondition" data-no-sanitize="true">
             </div>
             <div userRights="$$userRights" class="form-field-container">
                 <div class="form-field" id="date">
@@ -101,11 +101,11 @@
 
             <div class="form-field advanced-settings">
                 <div class="label-container">
-                    <label class="label" for="recallCheckbox" userRights="$$userRights">Advanced Settings</label>
+                    <label class="label" for="batchRecall" userRights="$$userRights">Advanced Settings</label>
                     <img class="pen-square" src="./assets/icons/pen-square.svg" alt="pen-square">
                 </div>
-                <div class="advanced-settings-container">
-                    <input userRights="$$userRights" type="checkbox" class="text-input" name="recallCheckbox" id="recallCheckbox">
+                <div class="advanced-settings-container"> 
+                    <input userRights="$$userRights" type="checkbox" class="text-input" name="batchRecall" id="batchRecall">
                     <input userRights="$$userRights" type="text" class="" name="recallLabel" id="recallLabel" value="Mark Batch as Recalled" disabled>
                 </div>
             </div>
