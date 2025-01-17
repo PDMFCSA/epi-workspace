@@ -136,8 +136,11 @@ export class ProductsService {
         let productPhotoPayload = await this.retrieveProductPhotoPayload(productCode)
 
         let leafletEPIs = await webSkel.appServices.retrieveEPIs(productCode, undefined, constants.API_MESSAGE_TYPES.EPI.LEAFLET);
+        let prescribingInfoEPIS = await webSkel.appServices.retrieveEPIs(productCode, undefined, constants.API_MESSAGE_TYPES.EPI.PRESCRIBING_INFO);
         let smpcEPIs = await webSkel.appServices.retrieveEPIs(productCode, undefined, constants.API_MESSAGE_TYPES.EPI.SMPC);
-        let EPIs = [...leafletEPIs, ...smpcEPIs];
+
+        // let EPIs = result.flat();
+        let EPIs = [...leafletEPIs, ...prescribingInfoEPIS, ...smpcEPIs];
         return {productPayload, productPhotoPayload, EPIs}
     }
 

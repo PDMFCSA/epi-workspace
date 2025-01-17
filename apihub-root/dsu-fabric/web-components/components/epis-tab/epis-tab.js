@@ -18,6 +18,7 @@ export class EPIsTab extends CommonPresenterClass {
                 stringHTML += `<div class="epi-unit" data-id="${epi.id}">
                             <div class="epi-details">
                                 <div class="epi-language">${gtinResolver.Languages.getLanguageName(epi.language)} ${epi.type}</div>
+                                <div>${epi.ePIMarket || ''}</div>
                                 <div class="epi-files">${epi.filesCount} files</div>
                             </div>
                             <div class="epi-buttons">
@@ -29,7 +30,7 @@ export class EPIsTab extends CommonPresenterClass {
                                 <img class="epi-img" src="./assets/icons/eye.svg" alt="eye">
                             </div>
                             </div>
-                         </div>`
+                        </div>`
             }
         } else {
             stringHTML = `<div class="no-data">No leaflets added yet</div>`;

@@ -9,6 +9,10 @@ export class ManageProductPage extends CommonPresenterClass {
         });
     }
 
+    static  getEPIKey(epi) {
+        return epi.ePIMarket ? `${epi.type}_${epi.language}` : `${epi.type}_${epi.language}_${epi.ePIMarket}`;
+    }
+
     async initModel() {
         let params = webSkel.getHashParams();
         //update an existing product (edit mode)
@@ -18,6 +22,8 @@ export class ManageProductPage extends CommonPresenterClass {
             let {
                 productPayload, productPhotoPayload, EPIs,
             } = await webSkel.appServices.getProductData(params["product-code"]);
+
+            console.log("productPayload=", productPayload, "epis=", EPIs);
             let productModel = webSkel.appServices.createNewProduct(productPayload, productPhotoPayload, EPIs);
             if (!productModel.photo.startsWith("data:image")) {
                 productModel.photo = "./assets/images/no-picture.png";
@@ -39,7 +45,12 @@ export class ManageProductPage extends CommonPresenterClass {
     beforeRender() {
         let tabInfo = this.productData.epiUnits.map((data) => {
             return {
-                language: data.language, filesCount: data.filesCount, id: data.id, action: data.action, type: data.type
+                id: data.id,
+                action: data.action,
+                language: data.language,
+                type: data.type,
+                ePIMarket: data.ePIMarket,
+                filesCount: data.filesCount,
             };
         });
         tabInfo = encodeURIComponent(JSON.stringify(tabInfo));
@@ -212,7 +223,7 @@ export class ManageProductPage extends CommonPresenterClass {
     }
 
     async addOrUpdateEpi(modalData) {
-        const existingLeafletIndex = this.productData.epiUnits.findIndex(epi => epi.language === modalData.language);
+        const existingLeafletIndex = this.productData.epiUnits.findIndex(epi => ManageProductPage.getEPIKey(epi) === ManageProductPage.getEPIKey(modalData));
         if (existingLeafletIndex !== -1) {
             /* epi already exists */
             if (this.productData.epiUnits[existingLeafletIndex].action === "add") {
