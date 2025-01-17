@@ -15,10 +15,11 @@ export class EPIsTab extends CommonPresenterClass {
                 if (epi.action === "delete") {
                     continue;
                 }
+
                 stringHTML += `<div class="epi-unit" data-id="${epi.id}">
                             <div class="epi-details">
-                                <div class="epi-language">${gtinResolver.Languages.getLanguageName(epi.language)} ${epi.type}</div>
-                                <div>${epi.ePIMarket || ''}</div>
+                                <div class="epi-language">${gtinResolver.Languages.getLanguageName(epi.language)} ${this.getEPIDescription(epi.type)}</div>
+                                <div>${this.getCountryName(epi.ePIMarket)}</div>
                                 <div class="epi-files">${epi.filesCount} files</div>
                             </div>
                             <div class="epi-buttons">
@@ -41,6 +42,22 @@ export class EPIsTab extends CommonPresenterClass {
 
     afterRender() {
         this.epis = JSON.parse(decodeURIComponent(this.element.getAttribute("data-units"))) || [];
+    }
+
+    getEPIDescription(value) {
+        const key = Object.keys(gtinResolver.constants.EPI_TYPES).find(key => gtinResolver.constants.EPI_TYPES[key] === value);
+        return key ? gtinResolver.constants.EPI_TYPES_DESCRIPTION[key] : null;
+    }
+
+    getCountryName(countryCode) {
+        let countryName = countryCode || "";
+        try {
+            if (countryCode)
+                countryName = gtinResolver.Countries.getCountry(countryCode);
+        } catch (e) {
+            console.error(e);
+        }
+        return countryName;
     }
 
 }
