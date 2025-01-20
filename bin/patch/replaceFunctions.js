@@ -32,35 +32,35 @@ function replaceLineInFile(filePath, line, newLine){
     console.log(`Patched line '${line}' has been replaced in ${filePath} to: ${newLine}`);
 };
 
-// const newRespondFunction = `
-//     function respond(res, content, statusCode) {
-//         if (statusCode) {
-//             res.statusCode = statusCode;
-//             if(res.req.url.includes('leaflets'))
-//                 logger.audit(0x102, \`Responding to url \${res.req.url} with status code \${statusCode}\`);
-//             else
-//                 logger.audit(0x104, \`Responding to url \${res.req.url} with status code \${statusCode}\`);
-//         } else {
-//             if(res.req.url.includes('leaflets'))
-//                 logger.audit(0x101, \`Successful serving url \${res.req.url}\`);
-//             else
-//                 logger.audit(0x103, \`Successful serving url \${res.req.url}\`);
-//             res.statusCode = 200;
-//         }
-//         const fixedURLExpiry = server.config.fixedURLExpiry || DEFAULT_MAX_AGE;
-//         res.setHeader("cache-control", \`max-age=\${fixedURLExpiry}\`);
-//         res.write(content);
-//         res.end();
-//     }`;
+const newRespondFunction = `
+    function respond(res, content, statusCode) {
+        if (statusCode) {
+            res.statusCode = statusCode;
+            if(res.req.url.includes('leaflets'))
+                logger.audit(0x102, \`Responding to url \${res.req.url} with status code \${statusCode}\`);
+            else
+                logger.audit(0x104, \`Responding to url \${res.req.url} with status code \${statusCode}\`);
+        } else {
+            if(res.req.url.includes('leaflets'))
+                logger.audit(0x101, \`Successful serving url \${res.req.url}\`);
+            else
+                logger.audit(0x103, \`Successful serving url \${res.req.url}\`);
+            res.statusCode = 200;
+        }
+        const fixedURLExpiry = server.config.fixedURLExpiry || DEFAULT_MAX_AGE;
+        res.setHeader("cache-control", \`max-age=\${fixedURLExpiry}\`);
+        res.write(content);
+        res.end();
+    }`;
 
-// replaceFunctionInFile(path.join(process.cwd(), './opendsu-sdk/builds/output/pskWebServer.js'), 'respond', newRespondFunction);
+replaceFunctionInFile(path.join(process.cwd(), './opendsu-sdk/builds/output/pskWebServer.js'), 'respond', newRespondFunction);
 
-// Middleware initialization string in pskWebServer.js
-const fixedUrlMiddleware = "FixedUrls(server);";
+// // Middleware initialization string in pskWebServer.js
+// const fixedUrlMiddleware = "FixedUrls(server);";
 
 
-// Remove Fixed Url Middleware
-replaceLineInFile(path.join(process.cwd(), './opendsu-sdk/builds/output/pskWebServer.js'), fixedUrlMiddleware, "//" + fixedUrlMiddleware);
+// // Remove Fixed Url Middleware
+// replaceLineInFile(path.join(process.cwd(), './opendsu-sdk/builds/output/pskWebServer.js'), fixedUrlMiddleware, "//" + fixedUrlMiddleware);
 
 
 
