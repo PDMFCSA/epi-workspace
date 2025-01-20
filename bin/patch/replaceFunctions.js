@@ -1,14 +1,19 @@
 const fs = require('fs');
 const path = require('path');
 
-function replaceRespondFunctionInFile(filePath, functionName, newFunction) {
+function replaceFunctionInFile(filePath, functionName, newFunction) {
     // Read the file contents
     let fileContent = fs.readFileSync(filePath, 'utf8');
 
   
     // Create a regex pattern to capture the full function definition
+    // const functionRegex = new RegExp(
+    //     `function\\s+${functionName}\\s*\\([^)]*\\)\\s*{[^]*?logger.audit\\([^)]*\\);[^]*?res.setHeader\\([^)]*\\);[^]*?res.write\\([^)]*\\);[^]*?res.end\\([^)]*\\);[^]*?}`,
+    //     'gm'
+    // );
+
     const functionRegex = new RegExp(
-        `function\\s+${functionName}\\s*\\([^)]*\\)\\s*{[^]*?logger.audit\\([^)]*\\);[^]*?res.setHeader\\([^)]*\\);[^]*?res.write\\([^)]*\\);[^]*?res.end\\([^)]*\\);[^]*?}`,
+        `function\\s+${functionName}.*{[\\s\\S]*?\\}[\\n\\S]$`,
         'gm'
     );
 
@@ -42,4 +47,4 @@ const newRespondFunction = `
         res.end();
     }`;
 
-replaceRespondFunctionInFile(path.join(process.cwd(), './opendsu-sdk/builds/output/pskWebServer.js'), 'respond', newRespondFunction);
+replaceFunctionInFile(path.join(process.cwd(), './opendsu-sdk/builds/output/pskWebServer.js'), 'respond', newRespondFunction);
