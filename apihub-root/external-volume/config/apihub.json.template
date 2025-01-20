@@ -35,6 +35,10 @@
       "module": "./../../gtin-resolver",
       "function": "getGTINOwner"
     },
+        "get-fixed-url": {
+      "module": "./../../fixed-urls",
+      "function": "getFixedUrl"
+    },
     "integration-api": {
       "module": "./../../gtin-resolver",
       "function": "getIntegrationAPIs",
