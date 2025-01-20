@@ -35,7 +35,7 @@
       "module": "./../../gtin-resolver",
       "function": "getGTINOwner"
     },
-        "get-fixed-url": {
+    "get-fixed-url": {
       "module": "./../../fixed-urls",
       "function": "getFixedUrl"
     },
