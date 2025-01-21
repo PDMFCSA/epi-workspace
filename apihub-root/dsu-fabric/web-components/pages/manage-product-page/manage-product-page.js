@@ -284,7 +284,7 @@ export class ManageProductPage extends CommonPresenterClass {
         let existingStrengthIndex = this.productData.strengthUnits.findIndex(strength => strength.id === modalData.id);
         if (existingStrengthIndex !== -1) {
             this.productData.strengthUnits[existingStrengthIndex] = modalData;
-            console.log(`updated strengthUnits, substance: ${modalData.substance}`);
+            console.log(`updated strengthUnits, strength:`, modalData);
             return true;
         }
         return false;
@@ -301,8 +301,9 @@ export class ManageProductPage extends CommonPresenterClass {
     }
 
     async handleStrengthModalData(data) {
-        if (!this.updateStrength(data)) {
-            data.id = webSkel.appServices.generateID(16);
+        const {action, id, ...payload} = data;
+        data.id = webSkel.appServices.generateDeterministicId(payload);
+        if (!this.updateStrength({...data})) {
             data.action = "add";
             this.productData.strengthUnits.push(data);
         }
@@ -311,7 +312,7 @@ export class ManageProductPage extends CommonPresenterClass {
     }
 
     async showAddMarketModal() {
-        let excludedOptions = this.productData.marketUnits.filter(data => data.action !== "delete")
+        let excludedOptions = this.productData.marketUnits.filter(data => data.action !== constants.ACTIONS.DELETE)
             .map(data => data.marketId);
         let encodedExcludedOptions = encodeURIComponent(JSON.stringify(excludedOptions));
         let modalData = await webSkel.showModal("markets-management-modal", {excluded: encodedExcludedOptions}, true);
@@ -322,7 +323,7 @@ export class ManageProductPage extends CommonPresenterClass {
     }
 
     async addStrengthModal() {
-        let excludedOptions = this.productData.marketUnits.filter(data => data.action !== "delete");
+        let excludedOptions = this.productData.strengthUnits.filter(data => data.action !== constants.ACTIONS.DELETE);
         let encodedExcludedOptions = encodeURIComponent(JSON.stringify(excludedOptions));
         let modalData = await webSkel.showModal("strengths-management-modal", {excluded: encodedExcludedOptions}, true);
         if (modalData) {
@@ -400,7 +401,7 @@ export class ManageProductPage extends CommonPresenterClass {
         let marketUnit = webSkel.getClosestParentElement(_target, ".market-unit");
         let id = marketUnit.getAttribute("data-id");
         let selectedMarketUnit = this.productData.marketUnits.find(unit => unit.id === id);
-        selectedMarketUnit.action = "delete";
+        selectedMarketUnit.action = constants.ACTIONS.DELETE;
         //this.productData.marketUnits = this.productData.marketUnits.filter(unit => unit.id !== id);
         this.invalidate();
     }

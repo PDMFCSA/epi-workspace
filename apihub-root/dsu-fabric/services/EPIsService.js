@@ -144,7 +144,6 @@ export class EPIsService {
     }
 
     async executeEPIActions(EPIs, productCode, batchNumber) {
-        console.log("$ EPIs=", EPIs,)
         let failedEpiOperations = [];
         for (let EPI of EPIs) {
             try {

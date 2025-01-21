@@ -36,6 +36,9 @@ export default {
             SMPC: "smpc"
         }
     },
+    ACTIONS: {
+        DELETE: "delete"
+    },
     EPI_ACTIONS: {
         ADD: "add",
         UPDATE: "update",

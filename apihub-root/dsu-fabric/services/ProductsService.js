@@ -101,7 +101,7 @@ export class ProductsService {
 
             if (productPayload.strengths) {
                 productPayload.strengths = productPayload.strengths.map(item => {
-                    item.id = webSkel.appServices.generateID(16);
+                    item.id = webSkel.appServices.generateDeterministicId(item);
                     return item
                 });
             }

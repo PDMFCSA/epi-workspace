@@ -15,6 +15,23 @@ export class UtilsService {
 
     dbMessageFields = ["pk", "meta", "did", "__timestamp", "$loki", "context", "keySSI", "epiProtocol", "version"];
 
+    generateDeterministicId(...input) {
+        input = Array.isArray(input) ? input : [input];
+        input = input.map((item) => {
+            if (typeof item === "object" && item !== null) {
+                return Object.entries(item).map(([key, value]) => `${key}:${value}`).join("_");
+            }
+            return item;
+        }).join("_");
+        let encode = 0;
+        const length = input.length;
+        for (let i = 0; i < length; i++) {
+            const char = input.charCodeAt(i);
+            encode = (encode * 131 + char) >>> 0;
+        }
+        return encode.toString();
+    }
+
     generateID(length) {
         const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
         return this.generate(characters, length);
