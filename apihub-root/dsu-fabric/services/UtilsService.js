@@ -84,17 +84,20 @@ export class UtilsService {
     }
 
     getEpiDiffViewObj(epiDiffObj) {
-        let newValueLanguage = "";
-        if (epiDiffObj.newValue) {
-            newValueLanguage = gtinResolver.Languages.getLanguageName(epiDiffObj.newValue.language);
+        let changedPropertyLabel;
+        const obj = epiDiffObj.newValue ? epiDiffObj.newValue : epiDiffObj.oldValue;
+        if (obj) {
+            const langLabel = gtinResolver.Languages.getLanguageName(obj.language)
+            const typeDescription = gtinResolver.UploadTypes.getEpiTypeDescription(obj.type);
+            changedPropertyLabel = `${langLabel} ${typeDescription}`
+            if (obj.ePIMarket) {
+                const ePIMarket = gtinResolver.Countries.getCountry(obj.ePIMarket)
+                changedPropertyLabel += ` for ${ePIMarket} (${obj.ePIMarket})`;
+            }
         }
-        let oldValueLanguage = "";
-        if (epiDiffObj.oldValue) {
-            oldValueLanguage = gtinResolver.Languages.getLanguageName(epiDiffObj.oldValue.language);
-        }
-        let changedProperty = epiDiffObj.newValue ? `${newValueLanguage}  ${epiDiffObj.newValue.type}` : `${oldValueLanguage}  ${epiDiffObj.oldValue.type}`
+
         return {
-            "changedProperty": changedProperty,
+            "changedProperty": changedPropertyLabel,
             "oldValue": {"value": epiDiffObj.oldValue || "-", "directDisplay": !epiDiffObj.oldValue},
             "newValue": {
                 "value": epiDiffObj.newValue && epiDiffObj.newValue.action !== "delete" ? epiDiffObj.newValue : "-",
