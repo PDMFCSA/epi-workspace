@@ -13,7 +13,7 @@ export class ManageProductPage extends CommonPresenterClass {
     }
 
     static  getEPIKey(epi) {
-        return epi.ePIMarket ? `${epi.type}_${epi.language}` : `${epi.type}_${epi.language}_${epi.ePIMarket}`;
+        return epi.ePIMarket ? `${epi.type}_${epi.language}_${epi.ePIMarket}` : `${epi.type}_${epi.language}`;
     }
 
     async initModel() {
@@ -239,9 +239,10 @@ export class ManageProductPage extends CommonPresenterClass {
                 /* previously added epi */
                 modalData.action = "add"
             } else {
+                const epiMarket = modalData.ePIMarket ? ` for ${this.getCountryName(modalData.ePIMarket)} market` : "";
                 let accept = await webSkel.showModal("dialog-modal", {
                     header: "Warning!!!",
-                    message: `This action will replace ${modalData.languageLabel} ${modalData.type}`,
+                    message: `This action will replace ${modalData.languageLabel} ${modalData.type}${epiMarket}`,
                     denyButtonText: "Cancel",
                     acceptButtonText: "Proceed"
                 }, true);
@@ -260,6 +261,17 @@ export class ManageProductPage extends CommonPresenterClass {
         }
         this.selected = "epi";
         this.invalidate();
+    }
+
+    getCountryName(countryCode) {
+        let countryName = countryCode || "";
+        try {
+            if (countryCode)
+                countryName = gtinResolver.Countries.getCountry(countryCode);
+        } catch (e) {
+            console.error(e);
+        }
+        return countryName;
     }
 
     async handleEPIModalData(data) {
