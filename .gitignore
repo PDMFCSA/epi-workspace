@@ -11,17 +11,12 @@ env.json.devel
 opendsu-sdk/builds/output/
 
 
-acdc-authentication-feature-template/
 acdc/
 apihub-root/bundles/
 apihub-root/external-volume/mqs/
 apihub-root/external-volume/wallets/
-apihub-root/lightweight-pwa/lib/
 .ssotoken
 demiurge/
-delayv-auth-feat-ssapp/
-reporting-service/
-truemedhemo-auth-feat-ssapp/
 opendsu-sdk/
 
 apihub-root/external-volume/config/apihub.json
