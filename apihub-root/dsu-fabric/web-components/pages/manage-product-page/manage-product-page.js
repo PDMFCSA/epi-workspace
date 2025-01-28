@@ -446,7 +446,6 @@ export class ManageProductPage extends CommonPresenterClass {
             .map(data => data.marketId);
         let encodedExcludedOptions = encodeURIComponent(JSON.stringify(excludedOptions));
 
-
         let modalData = await webSkel.showModal("markets-management-modal", {
             ["updateData"]: encodedJSON, id: selectedUnit.id, excluded: encodedExcludedOptions
         }, true);
