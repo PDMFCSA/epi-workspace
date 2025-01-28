@@ -22,12 +22,12 @@
             <label class="form-label" for="type">Type</label>
             <select class="form-input" id="type" name="type" required>
                 <option id="leaflet" value="leaflet">Patient Information</option>
-                <option id="prescribingInfo" value="prescribingInfo">Prescribing Information</option>
+                <option class="hidden-for-batch" id="prescribingInfo" value="prescribingInfo">Prescribing information for Healthcare professionals</option>
                 <option id="smpc" value="SMPC" disabled>SMPC</option>
             </select>
         </div>
 
-        <div class="form-item">
+        <div class="form-item hidden-for-batch">
             <label class="form-label" for="ePIMarket">Market</label>
             <select class="form-input" id="ePIMarket" name="ePIMarket">
                 <option selected id="" value=""></option>
