@@ -1,0 +1,3 @@
+[submodule "gtin-resolver"]
+	path = gtin-resolver
+	url = https://github.com/${GITHUB_ORGANIZATION}/gtin-resolver.git
