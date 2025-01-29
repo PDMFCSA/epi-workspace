@@ -1,5 +1,4 @@
 .idea
-mobile/scan-app
 ethadapter
 apihub-root/dsu-fabric/WebSkel
 apihub-root/demiurge/WebSkel
@@ -8,7 +7,6 @@ apihub-root/external-volume/domains
 node_modules
 package-lock.json
 env.json.devel
-opendsu-sdk/builds/output/
 
 
 acdc/
@@ -17,7 +15,7 @@ apihub-root/external-volume/mqs/
 apihub-root/external-volume/wallets/
 .ssotoken
 demiurge/
-opendsu-sdk/
+
 
 apihub-root/external-volume/config/apihub.json
 

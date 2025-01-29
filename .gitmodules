@@ -1,3 +1,12 @@
+[submodule "opendsu-sdk"]
+	path = opendsu-sdk
+	url = https://github.com/pharmaledgerassoc/opendsu-sdk.git
+[submodule "eth-adapter"]
+	path = eth-adapter
+	url = https://github.com/pharmaledgerassoc/eth-adapter.git
 [submodule "gtin-resolver"]
 	path = gtin-resolver
-	url = https://github.com/${GITHUB_ORGANIZATION}/gtin-resolver.git
+	url = https://github.com/pharmaledgerassoc/gtin-resolver.git
+[submodule "lwa"]
+	path = lwa
+	url = https://github.com/pharmaledgerassoc/lwa.git
