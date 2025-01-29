@@ -3,8 +3,8 @@
   "version": "v3.0.3",
   "description": "",
   "scripts": {
-    "override-git-remote": "git config --local url.\"${GUTHUB_ORGANIZATION}\".insteadOf \"pharmaledgerassoc\" && git submodule foreach --recursive 'git config --local url.\"${GITHUB_ORGANIZATION}\".insteadOf \"pharmaledgerassoc\"'",
-    "init-submodules": "git submodule update --init --recursive --remote",
+    "override-git-remote": "git config url.\"${GUTHUB_ORGANIZATION}\".insteadOf \"pharmaledgerassoc\"",
+    "init-submodules": "git submodule update --recursive --remote",
     "preinstall": "npm run override-git-remote && npm run init-submodules",
     "dev-install": "node ./bin/mkDevEnv.js",
     "do-install": "node ./node_modules/octopus/scripts/ensureFreezeState.js && node ./node_modules/octopus/scripts/run",
