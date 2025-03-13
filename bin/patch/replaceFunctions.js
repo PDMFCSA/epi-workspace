@@ -60,7 +60,7 @@ const fixedUrlMiddleware = "FixedUrls(server);";
 
 
 // Remove Fixed Url Middleware
-replaceLineInFile(path.join(process.cwd(), './opendsu-sdk/builds/output/pskWebServer.js'), fixedUrlMiddleware, "//" + fixedUrlMiddleware);
+// replaceLineInFile(path.join(process.cwd(), './opendsu-sdk/builds/output/pskWebServer.js'), fixedUrlMiddleware, "//" + fixedUrlMiddleware);
 
 
 
