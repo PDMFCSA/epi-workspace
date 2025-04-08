@@ -222,7 +222,7 @@ describe(`${testName} Product`, () => {
             const resPhoto = await client.get(`/image/${product.productCode}`, "string");
             expect(resPhoto.data).toEqual(IMAGE); 
             
-            await AuditLogChecker.assertAuditReason(constants.OPERATIONS.ADD_PRODUCT_PHOTO, product.productCode);
+            await AuditLogChecker.assertImageAudit(constants.OPERATIONS.ADD_PRODUCT_PHOTO, product.productCode, IMAGE);
 
         });
 
@@ -530,7 +530,7 @@ describe(`${testName} Product`, () => {
             const updatedResPhoto = await client.get(`/image/${product.productCode}`, "string");
             expect(updatedResPhoto.data).toEqual(IMAGE2); 
             
-            await AuditLogChecker.assertAuditReason(constants.OPERATIONS.UPDATE_PRODUCT_PHOTO, product.productCode);
+            await AuditLogChecker.assertImageAudit(constants.OPERATIONS.UPDATE_PRODUCT_PHOTO, product.productCode, IMAGE2);
 
         });
 
