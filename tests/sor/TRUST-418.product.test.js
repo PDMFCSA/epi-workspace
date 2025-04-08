@@ -500,6 +500,7 @@ describe(`${testName} Product`, () => {
                 }
             }
         });
+
         it("SUCCESS 200 - Update a photo", async () => {
 
             // Create image payload
