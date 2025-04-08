@@ -59,6 +59,10 @@ class IntegrationClient extends ApiClient {
         return this.send(`${this.getBaseURL()}/image/${gtin}`, 'GET', undefined, "text");
     };
 
+    async getImage(gtin){
+        return this.send(`${this.getBaseURL()}/image/${gtin}`, 'GET');
+    }
+
     async getProduct(gtin) {
         return this.send(`${this.getBaseURL()}/product/${gtin}`, 'GET');
     };
