@@ -9,12 +9,18 @@ const {FixedUrls} = require("../clients/FixedUrls");
 const {getRandomNumber} = require("../utils");
 const {constants} = require("../constants");
 const {AuditLogChecker} = require("../audit/AuditLogChecker");
-const {IMAGE, IMAGE2} = require("./fileUtils");
+const fs = require("node:fs");
+const path = require("path");
+
+
 
 const isCI = !!process.env.CI; // works for travis, github and gitlab
 const multiplier = isCI ? 4 : 1;
 jest.setTimeout(multiplier * 60 * 1000);
 const timeoutBetweenTests = multiplier * 5 * 1000;
+const IMAGE = (fs.readFileSync(path.join(__dirname, "..", "resources", "product_photo.txt"), {encoding: 'utf-8'})).trim();
+const IMAGE2 = (fs.readFileSync(path.join(__dirname, "..", "resources", "product_photo2.txt"), {encoding: 'utf-8'})).trim();
+
 
 const testName = "TRUST-418";
 
