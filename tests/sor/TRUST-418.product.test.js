@@ -9,6 +9,7 @@ const {FixedUrls} = require("../clients/FixedUrls");
 const {getRandomNumber} = require("../utils");
 const {constants} = require("../constants");
 const {AuditLogChecker} = require("../audit/AuditLogChecker");
+const {IMAGE, IMAGE2} = require("./fileUtils");
 
 const isCI = !!process.env.CI; // works for travis, github and gitlab
 const multiplier = isCI ? 4 : 1;
@@ -155,6 +156,29 @@ describe(`${testName} Product`, () => {
                 return;
             }
             throw new Error("Request should have failed with 422 status code");
+        });
+
+        it("SUCCESS 200 - Add a photo", async () => {
+            await AuditLogChecker.storeAuditLogSnapshot();
+            const {ticket} = UtilsService.getTicketId(expect.getState().currentTestName);
+            const product = await ModelFactory.product(ticket);
+            const res = await client.addProduct(product.productCode, product);
+            expect(res.status).toBe(200);
+
+            // Create image payload
+            const imagePayload = {
+                productCode: product.productCode,
+                imageData: IMAGE,
+            };
+
+            const photoRes = await client.addImage(product.productCode,imagePayload);
+            expect(photoRes.status).toBe(200);
+
+            const resPhoto = await client.get(`/image/${product.productCode}?version=2`, "string");
+            expect(resPhoto.data).toEqual(IMAGE); 
+            
+            await AuditLogChecker.assertAuditReason(constants.OPERATIONS.ADD_PRODUCT_PHOTO, product.productCode);
+
         });
 
     });
@@ -400,6 +424,32 @@ describe(`${testName} Product`, () => {
                     await AuditLogChecker.assertAuditLog(expectedUpdates[index].productCode, undefined, "PUT", constants.OPERATIONS.UPDATE_PRODUCT, data, expectedUpdates[index]);
                 }
             }
+        });
+        it.only("SUCCESS 200 - Update a photo", async () => {
+
+            // Create image payload
+            let imagePayload = {
+                productCode: product.productCode,
+                imageData: IMAGE,
+            };
+
+            const photoRes = await client.addImage(product.productCode,imagePayload);
+            expect(photoRes.status).toBe(200);
+
+            const resPhoto = await client.get(`/image/${product.productCode}?version=2`, "string");
+            expect(resPhoto.data).toEqual(IMAGE); 
+
+            // Create new image payload
+            imagePayload.imageData= IMAGE2
+
+            const updatedPhotoRes = await client.updateImage(product.productCode,imagePayload);
+            expect(updatedPhotoRes.status).toBe(200);
+
+            const updatedResPhoto = await client.get(`/image/${product.productCode}?version=2`, "string");
+            expect(updatedResPhoto.data).toEqual(IMAGE2); 
+            
+            await AuditLogChecker.assertAuditReason(constants.OPERATIONS.UPDATE_PRODUCT_PHOTO, product.productCode);
+
         });
 
     });

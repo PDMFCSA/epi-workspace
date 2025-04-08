@@ -50,9 +50,14 @@ class IntegrationClient extends ApiClient {
         return this.send(`${this.getBaseURL()}/image/${gtin}`, 'POST', productPhotoMessage);
     };
 
-    async updateImage(gtin, productPhotoMessage) {
+    async updateImage(gtin, payload) {
+        const productPhotoMessage = this.utils.initMessage(payload, API_MESSAGE_TYPES.PRODUCT_PHOTO);
         return this.send(`${this.getBaseURL()}/image/${gtin}`, 'PUT', productPhotoMessage);
     };
+
+    async getImage(gtin){
+        return this.send(`${this.getBaseURL()}/image/${gtin}`, 'GET');
+    }
 
     async getProduct(gtin) {
         return this.send(`${this.getBaseURL()}/product/${gtin}`, 'GET');
