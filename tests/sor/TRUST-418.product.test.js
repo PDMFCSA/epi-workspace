@@ -174,7 +174,7 @@ describe(`${testName} Product`, () => {
             const photoRes = await client.addImage(product.productCode,imagePayload);
             expect(photoRes.status).toBe(200);
 
-            const resPhoto = await client.get(`/image/${product.productCode}?version=2`, "string");
+            const resPhoto = await client.get(`/image/${product.productCode}`, "string");
             expect(resPhoto.data).toEqual(IMAGE); 
             
             await AuditLogChecker.assertAuditReason(constants.OPERATIONS.ADD_PRODUCT_PHOTO, product.productCode);
@@ -425,7 +425,7 @@ describe(`${testName} Product`, () => {
                 }
             }
         });
-        it.only("SUCCESS 200 - Update a photo", async () => {
+        it("SUCCESS 200 - Update a photo", async () => {
 
             // Create image payload
             let imagePayload = {
@@ -436,7 +436,7 @@ describe(`${testName} Product`, () => {
             const photoRes = await client.addImage(product.productCode,imagePayload);
             expect(photoRes.status).toBe(200);
 
-            const resPhoto = await client.get(`/image/${product.productCode}?version=2`, "string");
+            const resPhoto = await client.get(`/image/${product.productCode}`, "string");
             expect(resPhoto.data).toEqual(IMAGE); 
 
             // Create new image payload
@@ -445,7 +445,7 @@ describe(`${testName} Product`, () => {
             const updatedPhotoRes = await client.updateImage(product.productCode,imagePayload);
             expect(updatedPhotoRes.status).toBe(200);
 
-            const updatedResPhoto = await client.get(`/image/${product.productCode}?version=2`, "string");
+            const updatedResPhoto = await client.get(`/image/${product.productCode}`, "string");
             expect(updatedResPhoto.data).toEqual(IMAGE2); 
             
             await AuditLogChecker.assertAuditReason(constants.OPERATIONS.UPDATE_PRODUCT_PHOTO, product.productCode);
