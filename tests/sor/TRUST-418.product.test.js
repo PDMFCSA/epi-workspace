@@ -219,7 +219,7 @@ describe(`${testName} Product`, () => {
             const photoRes = await client.addImage(product.productCode,imagePayload);
             expect(photoRes.status).toBe(200);
 
-            const resPhoto = await client.get(`/image/${product.productCode}`, "string");
+            const resPhoto = await client.getProductPhoto(product.productCode,undefined)
             expect(resPhoto.data).toEqual(IMAGE); 
             
             await AuditLogChecker.assertImageAudit(constants.OPERATIONS.ADD_PRODUCT_PHOTO, product.productCode, IMAGE);
@@ -518,7 +518,7 @@ describe(`${testName} Product`, () => {
             const photoRes = await client.addImage(product.productCode,imagePayload);
             expect(photoRes.status).toBe(200);
 
-            const resPhoto = await client.get(`/image/${product.productCode}`, "string");
+            const resPhoto = await client.getProductPhoto(product.productCode,undefined)
             expect(resPhoto.data).toEqual(IMAGE); 
 
             // Create new image payload
@@ -527,7 +527,7 @@ describe(`${testName} Product`, () => {
             const updatedPhotoRes = await client.updateImage(product.productCode,imagePayload);
             expect(updatedPhotoRes.status).toBe(200);
 
-            const updatedResPhoto = await client.get(`/image/${product.productCode}`, "string");
+            const updatedResPhoto = await client.getProductPhoto(product.productCode,undefined)
             expect(updatedResPhoto.data).toEqual(IMAGE2); 
             
             await AuditLogChecker.assertImageAudit(constants.OPERATIONS.UPDATE_PRODUCT_PHOTO, product.productCode, IMAGE2);

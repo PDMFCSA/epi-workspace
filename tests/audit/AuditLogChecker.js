@@ -146,7 +146,7 @@ class AuditLogChecker {
         expect(audit.itemCode).toEqual(gtin);
         expect(audit.reason).toEqual(reason);
 
-        const resImage = await this.client.get(`/image/${gtin}?version=${audit.version}`, "string");
+        const resImage = await this.client.getProductPhoto(gtin,audit.version)
 
         expect(resImage.data).toEqual(image);
     }
