@@ -29,7 +29,8 @@ describe("LWA compatibility testing", () => {
 
     function getLwaEndPoint() {
         return env === "local" ? 
-            "http://localhost:8080/lwa/" : `https://lwa.${env}.pladevs.com/`; 
+            "http://localhost:8080/lwa/" :  env === "plaqa" ? 
+                `https://lwa.plaqa.org/` : `https://lwa.${env}.pladevs.com/`; 
     }
 
     async function getBrowser(osName) {
@@ -140,7 +141,7 @@ describe("LWA compatibility testing", () => {
 
             const loaderContainer = await browser.wait(
                 until.elementLocated(By.className('loader-container')),
-                10000
+                10000   
             );
             
             try {

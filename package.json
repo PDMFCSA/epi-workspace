@@ -30,6 +30,7 @@
     "test:unit": "jest --coverage --testPathPattern=\"/tests/unit\" --detectOpenHandles",
     "test-browserstack": "browserstack-node-sdk jest tests/browserstack/browserstack.test.js",
     "test-browserstack-preqa": "LWA=preqa npm run test-browserstack",
+    "test-browserstack-qa": "LWA=plaqa npm run test-browserstack",
     "test-browserstack-local": "BROWSERSTACK_LOCAL=true browserstack-node-sdk jest tests/browserstack/browserstack.test.js",
     "setup-browserstack-local": "npx setup --username tiagovenceslau_w5srmK --key $(cat .browserstack)",
     "test-old": "node ./opendsu-sdk/bin/scripts/testrunner.js --config=./test-suites.json",
@@ -41,7 +42,8 @@
     "patch-lwa-xml-parser": "node bin/patch/lwaXmlParser.js",
     "test-playwright": "npx playwright test --config=./playwright.config.js",
     "test-playwright-ui": "npx playwright test --config=./playwright.config.js --ui",
-    "test-playwright-setup": "npx playwright install --with-deps"
+    "test-playwright-setup": "npx playwright install --with-deps",
+    "test-playwright-accessibility": "npx playwright test tests/playwright/accessibility.test.js --config=./playwright.config.js --ui"
   },
   "repository": {
     "type": "git",
@@ -57,6 +59,7 @@
     "octopus": "git+http://github.com/opendsu/octopus.git"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.10.1",
     "@jest/test-sequencer": "^29.7.0",
     "@playwright/test": "^1.51.1",
     "@types/jest": "^29.5.14",

@@ -4,7 +4,7 @@ const { devices, defineConfig } = require('@playwright/test');
 module.exports =  defineConfig({
     testDir: './tests/playwright', // Caminho para a pasta onde os testes estão localizados
     timeout: 30000,     // Tempo limite para cada teste (em milissegundos)
-    retries: 0,         // Número de tentativas em caso de falha
+    retries: 1,         // Número de tentativas em caso de falha
     use: {
       permissions: ['camera'],
       headless: true,   // Executar os testes no modo headless
