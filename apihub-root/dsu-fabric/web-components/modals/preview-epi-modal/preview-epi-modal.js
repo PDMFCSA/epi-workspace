@@ -33,5 +33,27 @@ export class PreviewEpiModal {
         let xmlService = new gtinResolver.XMLDisplayService(document.querySelector(".modal-body"));
         xmlService.displayXmlContent("", decodeURIComponent(escape(atob(epiData.xmlFileContent))), epiData.otherFilesContent);
         xmlService.activateLeafletAccordion();
+        this.renderControlledSubstancesSymbol();
+    }
+
+    renderControlledSubstancesSymbol() {
+        const controlSubstance = document.getElementById("controlled-substance");
+        if(controlSubstance){
+            const img = document.createElement('img');
+            img.src = 'assets/images/controlled_substance.jpg';
+            img.alt = 'Controlled substance in Canada';
+            img.className = 'controlled-substance'
+            controlSubstance.appendChild(img);
+            this.addControlledSymbolToProductName();
+        }
+    }
+      
+    addControlledSymbolToProductName() {
+        const prodName = document.querySelector(".product-name");
+        const img = document.createElement('img');
+        img.alt = 'Controlled substance in Canada';
+        img.src = 'assets/images/controlled_substance.jpg';
+        img.className = 'controlled-substance'
+        prodName.prepend(img)
     }
 }
