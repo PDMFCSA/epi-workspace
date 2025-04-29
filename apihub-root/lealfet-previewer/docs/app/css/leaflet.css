@@ -1,0 +1,404 @@
+@import "prerequisites.css";
+
+.voiceover-pause {
+    opacity: 0;
+}
+
+
+fieldset {
+    border: none;
+    margin-top: .5rem;
+    padding: 0px;
+}
+
+.heading3 {  
+    font-size: var(--font-size--basic);
+    font-weight: 700;
+    margin: 0;
+}
+
+[class*="-button"],
+button:not([disabled]) {
+    cursor: pointer !important;
+}
+
+
+ 
+.product-name {
+    font-size: var(--font-size--XL);
+    font-weight: 700;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    /* 
+        white-space: wrap;
+        text-overflow: ellipsis;
+        -ms-text-overflow:ellipsis;
+        overflow: hidden;
+    */
+    margin: 0;
+    text-transform: uppercase;
+}
+
+/*.product-description {
+    font-size: var(--font-size--L);
+}*/
+
+#leaflet-content {
+    text-align: start;
+}
+
+#leaflet-content,
+#leaflet-content p,
+#leaflet-content h4 {
+    font-size: var(--font-size--basic);
+}
+
+#leaflet-content .select-lang-text {
+    padding: 35px;
+}
+
+#leaflet-content .languages-list li {
+    text-underline-position: under;
+    text-decoration: underline;
+    padding: 0px 0px 55px 0px;
+    color: blue;
+}
+
+#leaflet-content h2 {
+    font-weight: 700;
+    margin-right: 1rem;
+}
+
+.leaflet-content-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+#leaflet-content .table-container {
+    display: block;
+    overflow-x: auto !important;
+    box-sizing: border-box;
+    overflow-y: hidden;
+    scrollbar-width: thin;
+}
+
+#leaflet-content .table-container::-webkit-scrollbar {
+    width: 5px;
+}
+
+#leaflet-content table {
+    display: table;  
+    width: 100%;
+}
+
+@media(max-width: 768px) {
+    #leaflet-content table {
+        min-width: 768px !important;
+    } 
+}
+
+#leaflet-content figure {
+    display: block;
+    margin: 0 auto;
+}
+
+/* Force hidden content for images because xslt rule not working for safari < 16. */
+#leaflet-content figure *:not(img) {
+    display: none;
+}
+
+#leaflet-content img {
+    width: 100%;
+    height: auto !important;
+    min-width: 100%;
+    min-width: -webkit-fill-available; /* For WebKit-based browsers (Chrome, Safari) */
+    min-width: -moz-available; /* For Mozilla-based browsers (Firefox) */
+    min-width: fill-available; /* For compatibility */
+}
+
+.leaflet-link {
+    color: #4f4edf;;
+    text-decoration: underline;
+}
+
+
+.leaflet-accordion-item {
+    padding: 0px 3%;
+    border-bottom: 0.5px solid #E5EAEB;
+    line-height: 1.2;
+}
+
+.leaflet-accordion-item h2 {
+    margin-block-end: 0.7em;
+    margin-block-start: 0.9em;
+}
+
+.leaflet-accordion-item-content {
+    display: none;
+    margin-right: 5px;
+    height: fit-content;
+    scrollbar-width: thin !important;
+}
+
+.leaflet-accordion-item-content::-webkit-scrollbar {
+    width: 5px !important;
+}
+
+.leaflet-accordion-item.active .leaflet-accordion-item-content {
+    height: fit-content;
+    display: block;
+    position: relative;
+    font-style: normal;
+    font-weight: 400;
+    overflow-x: auto;
+}
+
+.leaflet-accordion-item:before {
+    content: "";
+    visibility: visible;
+    position: relative;
+    float: right;
+    background-image: url(../images/accordion-open.svg);
+    background-position: center;
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 24px;
+    height: 24px;
+    margin-left: 5px;
+}
+
+.leaflet-accordion-item.active:before {
+    background-image: url("../images/accordion-close.svg");
+}
+
+.leaflet-accordion-item table,
+.leaflet-accordion-item table td,
+.leaflet-accordion-item table th {
+    border: 1px solid;
+    border-collapse: collapse;
+    font-size: inherit;
+
+}
+
+.leaflet-accordion-item td, th {
+    padding: 5px;
+    width: auto;
+    height: 100%;
+}
+
+#settings-modal .modal-body {
+    scrollbar-width: thin !important;
+}
+
+#settings-modal .modal-body::-webkit-scrollbar {
+    width: 5px !important;
+}
+
+.settings-modal[dir="RTL"] .icon-title-container {
+    direction: rtl !important;  
+}
+
+.settings-modal[dir="RTL"] .product-description,
+.settings-modal[dir="RTL"] .product-name {
+    direction: rtl !important;    
+}
+
+.settings-modal[dir="RTL"] .leaflet-page .page-content {
+    text-align: right;
+}
+
+#leaflet-content[dir="RTL"] .leaflet-accordion-item:before {
+    float: left;
+    background-position: bottom;
+    top: 2px;
+    display: block;
+}
+
+#leaflet-content[dir="RTL"] #leaflet-content h2 {
+    margin-right: unset;
+    margin-block-start: unset;
+    padding-left: 10%;
+}
+
+
+.leaflet-page .icon-title-container {
+    flex-direction: row !important;
+}
+
+.leaflet-page .icon-title-container > div:not(.print-icon-container) {
+    width: calc(100% - 80px);
+}
+
+.leaflet-page .icon-title-container #print-modal-button,
+.leaflet-page .icon-title-container .print-icon-container {
+    width: 80px;
+    text-align: center;
+    background-position: center top;
+    border: none;   
+}
+
+#recalled-modal {
+    z-index: 10000;
+}
+
+/* Blur leaft left of recalled product/batch until user confirm  */ 
+#settings-modal.recalled {
+    filter: blur(5px) !important;
+}
+
+.lealfet-recalled-type {
+    display: flex;
+    justify-content: space-between;
+}
+
+#recalled-bar:not(.visible)  {
+    display: none;
+}
+ 
+
+
+#recalled-bar {
+    background: #058798;
+    border: 3px solid #27494e;
+    height: 50px;
+    max-height: auto;
+    max-width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-radius: 0;
+    font-weight: 500;
+    text-align: center;
+    padding: 5px;
+    bottom: 10vh;
+    position: relative;
+    width: 100%;
+    box-sizing: border-box;
+    left: 0;
+    overflow: hidden;
+}
+
+#recalled-bar  p {
+    font-size: var(--font-size--M) !important;
+    color: white;
+    height: inherit;
+}
+
+@media(max-width: 300px) {
+    .leaflet-page #recalled-bar {
+        bottom: 18vh;
+    } 
+    .leaflet-page #recalled-bar p {
+        font-size: 1.5rem !important;       
+    }
+}
+
+/* Zoom at 250% */
+@media(max-width: 150px) {
+    .leaflet-page #recalled-bar {
+        bottom: 38vh;
+    }
+     .leaflet-page #recalled-bar p {
+        font-size: 1.5rem !important;       
+    }
+}  
+
+
+
+
+/* Zoom at 250% */
+@media(max-width: 150px) {
+    .leaflet-page #recalled-bar {
+        bottom: 22.5vh;
+    }
+}  
+
+#print-content {
+    display: none;
+}
+
+.data-wrapper {
+    margin-bottom: 1.5rem !important;
+}
+
+/* remove margin top (vitor)
+.data-wrapper + .data-wrapper {
+    margin-top: -1.5rem;
+} */
+
+
+.data-wrapper h2, .data-wrapper h3 {
+    margin-top: 0px !important;
+}
+.data-wrapper div.row {
+    display: flex;
+}
+.data-wrapper div.row > div {
+    width: 50% !important;
+}
+.data-wrapper div.row > div:nth-child(1) {
+    font-weight: bold;
+}
+
+.data-wrapper .row [data-attr] {
+    display: flex;
+   align-items: flex-end;
+}
+
+#list-of-excipients > p {
+    margin-top: 0px !important;
+    /* margin-left: 1rem; */
+}
+
+#list-of-excipients b {
+    font-size: 16px !important;
+}
+
+#manufacturer-data {
+    /* margin-left: 1rem; */
+}
+#manufacturer-data > div:nth-child(1) {
+    margin: 5px 0 !important;
+}
+
+video {
+    display: block;
+    margin: 0 auto;
+}
+
+
+
+/* .modal-container:not(#print-modal).hiddenElement > div,
+.page-container.hiddenElement > div{
+    animation: fadeOut .2s forwards;
+}
+
+.modal-container:not(#print-modal):not(.hiddenElement) > div,
+.page-container:not(.hiddenElement) > div{
+    animation: fadeIn .4s forwards;
+}
+
+
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: .25;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: .25;
+    }
+    to {
+        opacity: 1;
+    }
+} */
+
+/* #recalled-modal.warning-modal .modal-header .modal-icon {
+    background: url(./../images/modal-info-icon.svg) no-repeat center;
+} */

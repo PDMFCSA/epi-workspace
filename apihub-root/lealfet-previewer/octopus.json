@@ -1,0 +1,137 @@
+{
+  "workDir": ".",
+  "dependencies": [
+    {
+      "name": "lwa",
+      "src": "https://github.com/pharmaledgerassoc/LWA.git",
+      "actions": [
+        {
+          "type": "smartClone",
+          "target": ".",
+          "collectLog": false
+        },
+        {
+          "type": "execute",
+          "cmd": "cd lwa && npm install"
+        }
+      ]
+    },
+    {
+      "name": "lwa-common-deps",
+      "actions": [
+        {
+          "type": "copy",
+          "src": "lwa/app/css/leaflet.css",
+          "target": "./docs/app/css/leaflet.css",
+          "options": {
+            "overwrite": true
+          }
+        },
+        {
+          "type": "copy",
+          "src": "lwa/app/css/prerequisites.css",
+          "target": "./docs/app/css/prerequisites.css",
+          "options": {
+            "overwrite": true
+          }
+        },
+        {
+          "type": "copy",
+          "src": "lwa/app/fonts",
+          "target": "./docs/app/fonts",
+          "options": {
+            "overwrite": true
+          }
+        },
+        {
+          "type": "copy",
+          "src": "lwa/app/images/app-icon.png",
+          "target": "./docs/app/images/app-icon.png",
+          "options": {
+            "overwrite": true
+          }
+        },
+        {
+          "type": "copy",
+          "src": "lwa/app/images/accordion-open.svg",
+          "target": "./docs/app/images/accordion-open.svg",
+          "options": {
+            "overwrite": true
+          }
+        },
+        {
+          "type": "copy",
+          "src": "lwa/app/images/accordion-close.svg",
+          "target": "./docs/app/images/accordion-close.svg",
+          "options": {
+            "overwrite": true
+          }
+        },
+        {
+          "type": "copy",
+          "src": "lwa/app/js/services/XMLDisplayService",
+          "target": "./docs/app/js/services/XMLDisplayService",
+          "options": {
+            "overwrite": true
+          }
+        },
+        {
+          "type": "copy",
+          "src": "lwa/app/js/utils/leafletUtils.js",
+          "target": "./docs/app/js/utils/leafletUtils.js",
+          "options": {
+            "overwrite": true
+          }
+        },
+        {
+          "type": "copy",
+          "src": "lwa/app/js/utils/CustomError.js",
+          "target": "./docs/app/js/utils/CustomError.js",
+          "options": {
+            "overwrite": true
+          }
+        },
+        {
+          "type": "copy",
+          "src": "lwa/utils.js",
+          "target": "./docs/utils.js",
+          "options": {
+            "overwrite": true
+          }
+        },
+        {
+          "type": "copy",
+          "src": "lwa/constants.js",
+          "target": "./docs/constants.js",
+          "options": {
+            "overwrite": true
+          }
+        },
+        {
+          "type": "copy",
+          "src": "lwa/environment.js",
+          "target": "./docs/environment.js",
+          "options": {
+            "overwrite": true
+          }
+        },
+        {
+          "type": "copy",
+          "src": "lwa/GS1DigitalLinkToolkit",
+          "target": "./docs/GS1DigitalLinkToolkit",
+          "options": {
+            "overwrite": true
+          }
+        },
+        {
+          "type": "copy",
+          "src": "lwa/interpretGS1scan",
+          "target": "./docs/interpretGS1scan",
+          "options": {
+            "overwrite": true
+          }
+        }
+      ]
+    }
+  ]
+}

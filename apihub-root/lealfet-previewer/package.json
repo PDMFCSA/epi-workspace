@@ -1,0 +1,26 @@
+{
+  "name": "leaflet-preview",
+  "version": "1.0.0",
+  "description": "Leaflet preview application code",
+  "main": "docs/index.html",
+  "directories": {
+    "lib": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "postinstall": "node ./node_modules/octopus/scripts/run dependencies devmode"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pharmaledgerassoc/leaflet-preview.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/pharmaledgerassoc/leaflet-preview.git/issues"
+  },
+  "homepage": "https://github.com/pharmaledgerassoc/leaflet-preview.git#readme",
+  "dependencies": {
+    "octopus": "git+http://github.com/opendsu/octopus.git"
+  }
+}
