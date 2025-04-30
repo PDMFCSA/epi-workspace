@@ -88,6 +88,8 @@ const migrateDatabase = async (folderPath, renamedFolderPath, migratedPath, fold
 
     renameFolderAndUpdateFile(folderPath, renamedFolderPath, folderName, renamedFolderName);
 
+    await new Promise((resolve) => setTimeout(resolve, 5000));
+
     const structuredLokiEnclaveFacade = LokiEnclaveFacade.createLokiEnclaveFacadeInstance(path.join(renamedFolderPath, 'database'), undefined, LokiEnclaveFacade.Adapters.STRUCTURED);
     const partitionedLokiEnclaveFacade = LokiEnclaveFacade.createLokiEnclaveFacadeInstance(path.join(folderPath, 'database'), undefined, LokiEnclaveFacade.Adapters.FS);
 
