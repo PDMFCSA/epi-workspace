@@ -1,5 +1,5 @@
 {
-  "name": "@epi-workspace-pdm/openapi-server",
+  "name": "@epi-workspace/openapi-server",
   "version": "1.0.0",
   "repository": {
     "type": "git",
