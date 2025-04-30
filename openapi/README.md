@@ -1,8 +1,7 @@
 # 📄 OpenAPI Documentation Server for GTIN Resolver
 
 This is an Express server that dynamically generates **OpenAPI** documentation and serves a **Swagger UI** for the
-endpoints
-defined inside the `gtin-resolver` project.
+endpoints defined inside the `gtin-resolver` project.
 
 #### It supports:
 
@@ -18,12 +17,12 @@ defined inside the `gtin-resolver` project.
 ### Install all the dependencies:
 
 ```sh
-$ npm install   
+npm install   
 ```
 
-### Generate Documentation (optional)
+### Generate Documentation (optional - ensures the latest version)
 
-Run the `build.js` script to generate the OpenAPI documentation files (ensures the latest version).
+Run the `build.js` script to generate the OpenAPI documentation files.
 
 ```bash
 npm run build
@@ -37,7 +36,7 @@ npm run start
 
 ### For development
 
-Run the `dev`  script to automatically restart the server whenever `npm run build` is executed:
+Run the `dev` script to automatically restart the server after each time `npm run build` is executed:
 
 ```bash
 npm run dev
