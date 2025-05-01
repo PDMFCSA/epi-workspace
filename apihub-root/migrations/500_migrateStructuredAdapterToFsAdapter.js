@@ -15,7 +15,7 @@ const isMigrationDone = (migratedPath) => {
 };
 
 // Utility function for renaming folders and updating file contents
-const renameFolderAndUpdateFile = (sourcePath, renamedPath, folderName, renamedFolderName) => {
+const renameFolderAndUpdateFile = async (sourcePath, renamedPath, folderName, renamedFolderName) => {
     // check if the source folder is empty
     let files;
     try {
@@ -40,6 +40,29 @@ const renameFolderAndUpdateFile = (sourcePath, renamedPath, folderName, renamedF
     const fileContent = fs.readFileSync(filePath);
     const newContent = fileContent.toString().replace(folderName, renamedFolderName);
     fs.writeFileSync(filePath, newContent);
+
+    while(!fs.existsSync(renamedFolderPath)) {
+        console.log(`Waiting for ${renamedFolderPath} to be created...`);
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+    }
+
+    let fileUpdated = false;
+
+    while (!fileUpdated) {
+        try {
+            const fileContent = fs.readFileSync(filePath);
+            const content = fileContent.toString();
+
+            if(!content.includes(renamedFolderName))
+                throw new Error(`File content not updated yet: ${filePath}`); 
+            
+            console.log(`File content updated: ${filePath}`);
+            fileUpdated = true;
+        } catch (e) {
+            console.log(`File not updated yet ${filePath}`, e);
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+        }
+    }
 };
 
 // Utility function for migrating a table from one database to another
@@ -86,9 +109,7 @@ const migrateDatabase = async (folderPath, renamedFolderPath, migratedPath, fold
         return;
     }
 
-    renameFolderAndUpdateFile(folderPath, renamedFolderPath, folderName, renamedFolderName);
-
-    await new Promise((resolve) => setTimeout(resolve, 5000));
+    await renameFolderAndUpdateFile(folderPath, renamedFolderPath, folderName, renamedFolderName);
 
     const structuredLokiEnclaveFacade = LokiEnclaveFacade.createLokiEnclaveFacadeInstance(path.join(renamedFolderPath, 'database'), undefined, LokiEnclaveFacade.Adapters.STRUCTURED);
     const partitionedLokiEnclaveFacade = LokiEnclaveFacade.createLokiEnclaveFacadeInstance(path.join(folderPath, 'database'), undefined, LokiEnclaveFacade.Adapters.FS);
