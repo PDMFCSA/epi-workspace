@@ -41,8 +41,8 @@ const renameFolderAndUpdateFile = async (sourcePath, renamedPath, folderName, re
     const newContent = fileContent.toString().replace(folderName, renamedFolderName);
     fs.writeFileSync(filePath, newContent);
 
-    while(!fs.existsSync(renamedFolderPath)) {
-        console.log(`Waiting for ${renamedFolderPath} to be created...`);
+    while(!fs.existsSync(filePath)) {
+        console.log(`Waiting for ${filePath} to be created...`);
         await new Promise((resolve) => setTimeout(resolve, 1000));
     }
 
@@ -53,7 +53,7 @@ const renameFolderAndUpdateFile = async (sourcePath, renamedPath, folderName, re
             const fileContent = fs.readFileSync(filePath);
             const content = fileContent.toString();
 
-            if(!content.includes(renamedFolderName))
+            if(!content.includes(filePath))
                 throw new Error(`File content not updated yet: ${filePath}`); 
             
             console.log(`File content updated: ${filePath}`);
