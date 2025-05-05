@@ -742,8 +742,3 @@ input[type="time"]::-webkit-clear-button,
 .hidden {
     display: none !important;
 }
-
-.controlled-substance {
-    width:auto !important;
-    min-width:auto !important;
-}

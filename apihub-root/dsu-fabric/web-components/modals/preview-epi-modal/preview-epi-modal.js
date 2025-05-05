@@ -37,23 +37,27 @@ export class PreviewEpiModal {
     }
 
     renderControlledSubstancesSymbol() {
-        const controlSubstance = document.getElementById("controlled-substance");
-        if(controlSubstance){
-            const img = document.createElement('img');
-            img.src = 'assets/images/controlled_substance.jpg';
-            img.alt = 'Controlled substance in Canada';
-            img.className = 'controlled-substance'
-            controlSubstance.appendChild(img);
+        const controlSubstances = document.querySelectorAll(".controlled-substance");
+        if(controlSubstances){
             this.addControlledSymbolToProductName();
+            controlSubstances.forEach((controlSubstance) => {
+            const img = document.createElement('img');
+            img.src = 'assets/images/controlled_substance.svg';
+            img.alt = 'Controlled substance in Canada';
+            img.className = 'controlled-substance-p '
+            controlSubstance.insertBefore(img, controlSubstance.firstChild);
+            })
         }
     }
       
-    addControlledSymbolToProductName() {
+    async addControlledSymbolToProductName() {
         const prodName = document.querySelector(".product-name");
-        const img = document.createElement('img');
-        img.alt = 'Controlled substance in Canada';
-        img.src = 'assets/images/controlled_substance.jpg';
-        img.className = 'controlled-substance'
-        prodName.prepend(img)
+        const response = await fetch('assets/images/controlled_substance.svg');
+        const svgText = await response.text();
+        const svg = document.createElement('div')
+        svg.alt = 'Controlled substance in Canada';
+        svg.className = 'controlled-substance-header controlled-substance';
+        svg.innerHTML= svgText;
+        prodName.prepend(svg);
     }
 }

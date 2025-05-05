@@ -1,4 +1,5 @@
 .product-name {
+    display: flex;
     font-size: var(--font-size--XL);
     font-weight: 700;
     white-space: nowrap;
@@ -355,3 +356,43 @@ video {
     display: block;
     margin: 0 auto;
 }
+
+
+.controlled-substance-header {
+    display: flex;
+    align-items: flex-start; 
+}
+
+.controlled-substance-p {
+    vertical-align: top;
+    top: 0px !important;
+    width: 0.5em !important;
+    height: auto;
+    min-width: min-content !important;
+
+}
+
+svg {
+    width: 0.7em;
+    height: auto;
+}
+
+
+#path979 {
+    stroke: white !important;
+    fill:none;
+    stroke:#231f20;
+    stroke-width:0.5;
+    stroke-linecap:butt;
+    stroke-linejoin:miter;
+    stroke-miterlimit:4;
+    stroke-dasharray:none;
+    stroke-opacity:1
+} 
+
+#path980 {
+    fill: white !important;
+    fill-opacity:1;
+    fill-rule:nonzero;
+    stroke:none
+} 
