@@ -643,16 +643,23 @@ class AppManager {
 //third phase... create or recover Identity
     async createIdentity(userDetails) {
         const vaultDomain = await $$.promisify(scAPI.getVaultDomain)();
+        console.log(`Vault domain: ${vaultDomain}`);
         const config = openDSU.loadAPI("config");
+        console.log(`Config : ${JSON.stringify(config)} `);
         let appName = await $$.promisify(config.getEnv)("appName");
+        console.log(`Application Name: ${appName}`);
         let userId = `${appName}/${userDetails.username}`;
+        console.log(`User ID: ${userId}`);
         let didDocument;
         let shouldPersist = false;
         const mainDID = await scAPI.getMainDIDAsync();
+        console.log(`Main DID: ${mainDID}`);
 
+  
         let initialiseIdentityModal;
 
         const healDID = async (didIdentifier) => {
+            console.log(`Healing DID: ${didIdentifier}`);
             try {
                 didDocument = await $$.promisify(w3cDID.resolveDID)(didIdentifier);
                 // try to sign with the DID to check if it's valid
@@ -660,6 +667,7 @@ class AppManager {
                 if (this.previousVersionWalletFound) {
                     shouldPersist = true;
                 }
+                console.log(`DID is valid. Persisting DID: ${didDocument.getIdentifier()}`);
             } catch (e) {
                 console.log(`Failed to resolve DID. Error: ${e.message}`)
                 let response = await fetch(`${window.location.origin}/resetUserDID/${vaultDomain}`, {method: "DELETE"});
