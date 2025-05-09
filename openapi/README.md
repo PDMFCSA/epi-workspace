@@ -14,6 +14,22 @@ endpoints defined inside the `gtin-resolver` project.
 
 ## Installation
 
+### Clone `epi-workspace` from the organization you’re working with:
+```sh
+git clone https://github.com/PDMFCSA/epi-workspace.git
+```
+```sh
+git clone https://github.com/pharmaledgerassoc/epi-workspace.git
+```
+
+### Navigate to the `openapi` folder:
+
+Move into the openapi directory to access the API specification files.
+
+```sh
+cd epi-workspace/openapi
+```
+
 ### Install all the dependencies:
 
 ```sh
