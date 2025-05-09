@@ -686,6 +686,12 @@ class AppManager {
                 }
             }
         }
+
+        if(mainDID.includes("@")) {
+            mainDID =  mainDID.replaceAll("@", "/");
+            console.log(`Main DID contained @ changing to ${mainDID}`);
+        }
+
         if (mainDID) {
             await healDID(mainDID);
         } else {
