@@ -17,6 +17,14 @@ jest.setTimeout(60000);
 
 const testName = "TECHOPS-382";
 
+const markets = [{
+    marketId: "IN",
+    nationalCode: "NC001",
+    mahAddress: "221B Baker Street",
+    mahName: `MAH`,
+    legalEntityName: `Legal Entity`
+}]
+
 describe(`${testName} Accessibility Setup`, () => {
     // retrieve integration api client
     const client = new IntegrationClient(config, testName);
@@ -46,15 +54,9 @@ describe(`${testName} Accessibility Setup`, () => {
             let {code} = item;
 
             const product = await ModelFactory.product(code, {
+                productCode: code,
                 inventedName: `Accessibility Test Product ${i}`,
                 nameMedicinalProduct: `Accessibility Test Product ${i} - extra info`,
-                markets: [{
-                    marketId: "IN",
-                    nationalCode: "NC001",
-                    mahAddress: "221B Baker Street",
-                    mahName: `${code} MAH`,
-                    legalEntityName: `${code} Legal Entity`
-                }],
                 strengths: [{
                     substance: "Dipiloma", strength: "500mg"
                 }]
@@ -91,6 +93,16 @@ describe(`${testName} Accessibility Setup`, () => {
 
     describe("screen 1 - creates leaflet and HCP for india screen popup", () => {
 
+        it(`should add India market for product ${data[0].code}`, async () => {
+            let product = products[0]
+            product = new Product({
+                ...product,
+                markets: markets
+            });
+            const updateProductResponse = await client.updateProduct(product.productCode, product);
+            expect(updateProductResponse.status).toEqual(200);
+        }),
+
         it(`should add a default leaflet for product ${data[0].code}`, async () => {
             const code = products[0].productCode;
             const payload = convertLeafletFolderToObject(path.join(process.cwd(), "tests/resources/accessibility"));
@@ -120,14 +132,10 @@ describe(`${testName} Accessibility Setup`, () => {
         })
     })
 
-    describe("screen 2 - creates leaflet and HCP for india screen popup", () => {
-        console.log("nothing to do in this case. why isn't this the same product as before?")
-    })
-
-    describe("screen 3 - adds 3 leaflets. no country, Brazil and France", () => {
+    describe("screen 2 - adds 3 leaflets. no country, Brazil and France", () => {
 // product 2
-        it(`should add a default leaflet for product ${data[2].code} - no market`, async () => {
-            const code = products[2].productCode;
+        it(`should add a default leaflet for product ${data[1].code} - no market`, async () => {
+            const code = products[1].productCode;
             const payload = convertLeafletFolderToObject(path.join(process.cwd(), "tests/resources/accessibility"));
             const leaflet = new Leaflet({
                 productCode: code,
@@ -140,8 +148,8 @@ describe(`${testName} Accessibility Setup`, () => {
             expect(res.status).toBe(200);
         })
 
-        it(`should add a default leaflet for product ${data[2].code} - brazil market`, async () => {
-            const code = products[2].productCode;
+        it(`should add a default leaflet for product ${data[1].code} - brazil market`, async () => {
+            const code = products[1].productCode;
             const payload = convertLeafletFolderToObject(path.join(process.cwd(), "tests/resources/accessibility"));
             const leaflet = new Leaflet({
                 productCode: code,
@@ -154,8 +162,8 @@ describe(`${testName} Accessibility Setup`, () => {
             expect(res.status).toBe(200);
         })
 
-        it(`should add a default leaflet for product ${data[2].code} - france market`, async () => {
-            const code = products[2].productCode;
+        it(`should add a default leaflet for product ${data[1].code} - france market`, async () => {
+            const code = products[1].productCode;
             const payload = convertLeafletFolderToObject(path.join(process.cwd(), "tests/resources/accessibility"));
             const leaflet = new Leaflet({
                 productCode: code,
@@ -169,8 +177,36 @@ describe(`${testName} Accessibility Setup`, () => {
         })
     })
 
-    describe("screen 4 - adds leaflet. marks product as recalled", () => {
+    describe("screen 3 - adds leaflet. marks product as recalled", () => {
 // product 3
+        it(`should add a default leaflet for product ${data[2].code}`, async () => {
+            const code = products[2].productCode;
+            const payload = convertLeafletFolderToObject(path.join(process.cwd(), "tests/resources/accessibility"));
+            const leaflet = new Leaflet({
+                productCode: code,
+                language: "en",
+                xmlFileContent: payload.payload.xmlFileContent,
+                otherFilesContent: payload.payload.otherFilesContent
+            });
+
+            const res = await client.addLeaflet(code, undefined, "en", API_MESSAGE_TYPES.EPI.LEAFLET, undefined, leaflet);
+            expect(res.status).toBe(200);
+        })
+
+        it("should recall the product", async () => {
+           let product = products[2]
+            product = new Product({
+                ...product,
+                productRecall: true
+            });
+            const updateProductResponse = await client.updateProduct(product.productCode, product);
+            expect(updateProductResponse.status).toEqual(200);
+        });
+    })
+
+    describe("screen 4 - adds leaflet. marks batch as recalled", () => {
+
+
         it(`should add a default leaflet for product ${data[3].code}`, async () => {
             const code = products[3].productCode;
             const payload = convertLeafletFolderToObject(path.join(process.cwd(), "tests/resources/accessibility"));
@@ -185,36 +221,8 @@ describe(`${testName} Accessibility Setup`, () => {
             expect(res.status).toBe(200);
         })
 
-        it("should recall the product", async () => {
-           let product = products[3]
-            product = new Product({
-                ...product,
-                productRecall: true
-            });
-            const updateProductResponse = await client.updateProduct(product.productCode, product);
-            expect(updateProductResponse.status).toEqual(200);
-        });
-    })
-
-    describe("screen 5 - adds leaflet. marks batch as recalled", () => {
-
-
-        it(`should add a default leaflet for product ${data[4].code}`, async () => {
-            const code = products[4].productCode;
-            const payload = convertLeafletFolderToObject(path.join(process.cwd(), "tests/resources/accessibility"));
-            const leaflet = new Leaflet({
-                productCode: code,
-                language: "en",
-                xmlFileContent: payload.payload.xmlFileContent,
-                otherFilesContent: payload.payload.otherFilesContent
-            });
-
-            const res = await client.addLeaflet(code, undefined, "en", API_MESSAGE_TYPES.EPI.LEAFLET, undefined, leaflet);
-            expect(res.status).toBe(200);
-        })
-
         it("should recall the batch", async () => {
-            const code = products[4].productCode;
+            const code = products[3].productCode;
             let batch = batches[code];
             batch = new Batch({
                 ...batch,
@@ -225,14 +233,11 @@ describe(`${testName} Accessibility Setup`, () => {
         });
     })
 
-    describe("screen 6 - adds leaflet. marks batch as recalled", () => {
-        console.log("nothing to do in this case. why isn't this the same product as screen 1?")
-    })
 
-    describe("screen 7 - adds 3 leaflets. spanish, korean, portuguese", () => {
+    describe("screen 5 - adds 3 leaflets. spanish, korean, portuguese", () => {
         ["es", "pt", "ko"].forEach((language) => {
-            it(`should add a default leaflet for product ${data[6].code} - spanish`, async () => {
-                const code = products[6].productCode;
+            it(`should add a default leaflet for product ${data[4].code} - spanish`, async () => {
+                const code = products[4].productCode;
                 const payload = convertLeafletFolderToObject(path.join(process.cwd(), "tests/resources/accessibility"));
                 const leaflet = new Leaflet({
                     productCode: code,
@@ -247,10 +252,10 @@ describe(`${testName} Accessibility Setup`, () => {
         })
     })
 
-    describe("screen 8 - creates leaflet and marks batch expiry to yesterday", () => {
+    describe("screen 6 - creates leaflet and marks batch expiry to yesterday", () => {
 
-        it(`should add a default leaflet for product ${data[7].code}`, async () => {
-            const code = products[7].productCode;
+        it(`should add a default leaflet for product ${data[5].code}`, async () => {
+            const code = products[5].productCode;
             const payload = convertLeafletFolderToObject(path.join(process.cwd(), "tests/resources/accessibility"));
             const leaflet = new Leaflet({
                 productCode: code,
@@ -264,7 +269,7 @@ describe(`${testName} Accessibility Setup`, () => {
         })
 
         it("should mark the batch as expired", async () => {
-            const code = products[7].productCode;
+            const code = products[5].productCode;
             let batch = batches[code];
             batch = new Batch({
                 ...batch,
@@ -273,10 +278,6 @@ describe(`${testName} Accessibility Setup`, () => {
             const updateBatchResponse = await client.updateBatch(code, batch.batchNumber, batch);
             expect(updateBatchResponse.status).toEqual(200);
         });
-    })
-
-    describe("screen 9 - get un unrecognized product", () => {
-        console.log("do nothing. just scan a bad gtin")
     })
 
 });

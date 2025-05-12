@@ -355,3 +355,7 @@ video {
     display: block;
     margin: 0 auto;
 }
+
+.voiceover-pause {
+    opacity: 0;
+}
