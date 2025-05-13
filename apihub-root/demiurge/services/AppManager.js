@@ -687,12 +687,13 @@ class AppManager {
             }
         }
 
-        if(mainDID.includes("@")) {
-            mainDID =  mainDID.replaceAll("@", "/");
-            console.log(`Main DID contained @ changing to ${mainDID}`);
-        }
+
 
         if (mainDID) {
+            if(mainDID.includes("@")) {
+                mainDID =  mainDID.replaceAll("@", "/");
+                console.log(`Main DID contained @ changing to ${mainDID}`);
+            }
             await healDID(mainDID);
         } else {
             initialiseIdentityModal = await webSkel.showModal("create-identity-modal");
