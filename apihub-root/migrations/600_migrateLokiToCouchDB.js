@@ -79,6 +79,7 @@ const insertRecord = async (dbPath, tableName, pk, record) => {
 const createCollection = async (dbPath, tableName, indexes) => {
     try {
         let dbName = await getDbName(dbPath, tableName);
+
         dbName = dbService.changeDBNameToLowerCaseAndValidate(dbName);
     
         const exists = await dbService.dbExists(dbName);
@@ -134,6 +135,17 @@ const migrate = async (dbPath) => {
         if(FIXED_URL_TABLE_NAMES.includes(table.name))
             indexes.push(FIXED_URL_TABLE_INDEXES);
 
+        let dbName;
+        try {
+            dbName = await getDbName(dbPath, tableName);
+            dbService.changeDBNameToLowerCaseAndValidate(dbName); 
+        } catch (e) {
+            if(decodeURIComponent(dbName.toLowerCase().replaceAll(':', '_').replaceAll(".", "-")).includes(" "))
+                return;
+
+            throw e;
+        }
+        
         await createCollection(dbPath, table.name, indexes);
 
         let records = table.data;
