@@ -141,7 +141,7 @@ const migrate = async (dbPath) => {
             dbService.changeDBNameToLowerCaseAndValidate(dbName); 
         } catch (e) {
             if(decodeURIComponent(dbName.toLowerCase().replaceAll(':', '_').replaceAll(".", "-")).includes(" "))
-                return;
+                continue;
 
             throw e;
         }
