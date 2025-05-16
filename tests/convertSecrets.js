@@ -5,16 +5,6 @@ const crypto = require('crypto');
 const authenticationModes = ["ocb", "ccm", "gcm"];
 const keySizes = [128, 192, 256];
 
-function encryptionIsAuthenticated(algorithm) {
-    for (const mode of authenticationModes) {
-        if (algorithm.includes(mode)) {
-            return true;
-        }
-    }
-
-    return false;
-}
-
 function getKeyLength(algorithm) {
     for (const len of keySizes) {
         if (algorithm.includes(len.toString())) {
@@ -95,7 +85,8 @@ async function testSecretFromCommandLine() {
             const secretPath = path.join(secretsPath, name);
             const secretContent = fs.readFileSync(secretPath);
             const b = decrypt(secretContent, encryptionKey);
-            fs.writeFileSync("./secrets/" + name.split(".")[0] + ".json", b);
+            fs.writeFileSync("./secrets/" + name.split(".")[0] + ".json", b, {flag:"w"});
+            
             console.log(`${name} decrypted successfully!`);
         }
         
@@ -105,4 +96,4 @@ async function testSecretFromCommandLine() {
     console.log("adminApiKeys.secret decrypted successfully!");
 }
 
-testSecretFromCommandLine();
+testSecretFromCommandLine().then(_ => console.log("All secrets decrypted successfully!")).catch(e => console.error(e));
