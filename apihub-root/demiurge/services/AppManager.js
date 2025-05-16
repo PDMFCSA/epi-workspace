@@ -556,17 +556,20 @@ class AppManager {
     async walletInitialization() {
         try {
             this.encryptedSSOSecret = await getSSOSecret();
+            console.warn("Already present SSOSecret: " + this.encryptedSSOSecret);
         } catch (e) {
             console.log("generating new secret")
             this.encryptedSSOSecret = await putSSOSecret();
+            console.warn("SSOSecret: " + this.encryptedSSOSecret);
         }
 
         const versionlessSSI = keySSISpace.createVersionlessSSI(undefined, `/${env.appName}_${getSSODetectedId()}`, deriveEncryptionKey(this.encryptedSSOSecret));
+        
         try {
             const dsu = await loadWallet(this.encryptedSSOSecret);
             let envJson = await dsu.readFileAsync("environment.json");
             envJson = JSON.parse(envJson);
-            console.log(envJson);
+            console.warn(JSON.stringify(envJson));
             env.WALLET_MAIN_DID = envJson.WALLET_MAIN_DID;
             env.enclaveKeySSI = envJson.enclaveKeySSI;
             env.enclaveType = envJson.enclaveType;
@@ -582,6 +585,7 @@ class AppManager {
         try {
             mainDSU = await $$.promisify(resolver.loadDSU)(versionlessSSI);
         } catch (error) {
+            console.log("Failed to load the Main DSU", error);
             // if error is failed to fetch then show an alert and reload the page
             if (error.rootCause === openDSU.constants.ERROR_ROOT_CAUSE.NETWORK_ERROR) {
                 utils.renderToast("Network error", "error", "block_alert");
@@ -589,13 +593,24 @@ class AppManager {
                 $$.forceTabRefresh();
                 return;
             }
+
+
             try {
-                mainDSU = await $$.promisify(resolver.createDSUForExistingSSI)(versionlessSSI);
-                await $$.promisify(mainDSU.writeFile)('environment.json', JSON.stringify(env));
-                this.walletJustCreated = true;
+                console.log("Attempting to load the Main DSU with a fallback versionlessSSI");
+                const testVersionlessSSI = keySSISpace.createVersionlessSSI(undefined, `/${env.appName}_${getSSODetectedId().replaceAll("@", "/")}`, deriveEncryptionKey(this.encryptedSSOSecret));
+                mainDSU = await $$.promisify(resolver.loadDSU)(testVersionlessSSI);
+                console.log("Attempting to load the Main DSU with a fallback versionlessSSI successful");
             } catch (e) {
-                webSkel.notificationHandler.reportUserRelevantWarning("Failed to create the wallet", e);
-                return;
+                console.warn("Failed to load the Main DSU with a fallback versionlessSSI", e);
+                try {
+                    console.log("Creating new Main DSU");
+                    mainDSU = await $$.promisify(resolver.createDSUForExistingSSI)(versionlessSSI);
+                    await $$.promisify(mainDSU.writeFile)('environment.json', JSON.stringify(env));
+                    this.walletJustCreated = true;
+                } catch (e) {
+                    webSkel.notificationHandler.reportUserRelevantWarning("Failed to create the wallet", e);
+                    return;
+                }
             }
         }
 
@@ -690,10 +705,10 @@ class AppManager {
 
 
         if (mainDID) {
-            if(mainDID.includes("@")) {
-                mainDID =  mainDID.replaceAll("@", "/");
-                console.log(`Main DID contained @ changing to ${mainDID}`);
-            }
+            // if(mainDID.includes("@")) {
+            //     mainDID =  mainDID.replaceAll("@", "/");
+            //     console.log(`Main DID contained @ changing to ${mainDID}`);
+            // }
             await healDID(mainDID);
         } else {
             initialiseIdentityModal = await webSkel.showModal("create-identity-modal");
