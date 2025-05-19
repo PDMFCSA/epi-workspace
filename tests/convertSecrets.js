@@ -71,7 +71,24 @@ function getDecryptionParameters (encryptedData, authTagLength = 0) {
 };
 
 async function testSecretFromCommandLine() {
-    const key = process.argv[2];
+    let key = process.argv[2];
+
+    if (!key) {
+        try {
+            console.log("Since no key was provided we will try to use the key in env.json file.");
+            const json = fs.readFileSync(path.join(__dirname, '..', '..',  'env.json'), 'utf8');
+            const envConfig = JSON.parse(json);
+            key = envConfig.SSO_SECRETS_ENCRYPTION_KEY;
+            
+            if (!key) {
+                console.error("No encryption key found in env.json");
+                process.exit(1);
+            }
+        } catch (error) {
+            console.error("Failed to get the encryption key in env.json", error);
+            process.exit(1);
+        }
+    }
     
     try {
         let encryptionKey = Buffer.from(key, "base64");
