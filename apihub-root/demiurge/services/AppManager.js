@@ -693,7 +693,7 @@ class AppManager {
                     let mainEnc = await $$.promisify(scAPI.getMainEnclave)();
                     let keyS = await $$.promisify(mainEnc.getKeySSI)();
                     console.log(keyS.getIdentifier());
-                    didDocument = await $$.promisify(mainEnc.createIdentity)("ssi:name", vaultDomain, userId);
+                    didDocument = await $$.promisify(mainEnc.createIdentity)("ssi:name", vaultDomain, userId.replaceAll("@", "/"));
                     shouldPersist = true;
                     this.walletJustCreated = true;
                 } catch (e) {
@@ -712,7 +712,7 @@ class AppManager {
             await healDID(mainDID);
         } else {
             initialiseIdentityModal = await webSkel.showModal("create-identity-modal");
-            const didIdentifier = `did:ssi:name:${vaultDomain}:${userId}`;
+            const didIdentifier = `did:ssi:name:${vaultDomain}:${userId.replaceAll("@", "/")}`;
             await healDID(didIdentifier);
             shouldPersist = true;
         }
