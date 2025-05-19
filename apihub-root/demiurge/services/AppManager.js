@@ -570,7 +570,7 @@ class AppManager {
             let envJson = await dsu.readFileAsync("environment.json");
             envJson = JSON.parse(envJson);
             console.warn(JSON.stringify(envJson));
-            env.WALLET_MAIN_DID = envJson.WALLET_MAIN_DID;
+            env.WALLET_MAIN_DID = envJson.WALLET_MAIN_DID || envJson.mainAppDID;
             env.enclaveKeySSI = envJson.enclaveKeySSI;
             env.enclaveType = envJson.enclaveType;
             env.enclaveDID = envJson.enclaveDID;
@@ -717,7 +717,52 @@ class AppManager {
             shouldPersist = true;
         }
         if (shouldPersist) {
-            await storeDID(didDocument.getIdentifier());
+            await storeDID(didDocument.getIdentifier().replaceAll("@", "/"));
+/**
+ * Stores the DID (Decentralized Identifier) and wallet status in the wallet storage.
+ * This function attempts to set the DID as the main DID and store it along with the wallet status.
+ * If the DID and wallet status are already stored and match the provided values, the function returns without making changes.
+ * 
+ * @async
+ * @param {string|object} did - The DID to be stored. Can be a string or an object with a getIdentifier method.
+ * @param {string} [walletStatus=constants.ACCOUNT_STATUS.WAITING_APPROVAL] - The status of the wallet. Defaults to WAITING_APPROVAL.
+ * @throws {Error} Throws an error if the storage operation fails after retries.
+ * @returns {Promise<void>} A promise that resolves when the DID is successfully stored or if no changes were needed.
+ */
+async function setStoredDID(did, walletStatus = constants.ACCOUNT_STATUS.WAITING_APPROVAL) {
+    const walletStorage = await $$.promisify(dbAPI.getMainEnclave)();
+    const _setStoredDID = async () => {
+        if (typeof did !== "string") {
+            did = did.getIdentifier();
+        }
+        let batchId = await walletStorage.startOrAttachBatchAsync();
+        try {
+            await scAPI.setMainDIDAsync(did);
+            await walletStorage.writeKeyAsync(constants.IDENTITY, {did, walletStatus});
+            await walletStorage.commitBatchAsync(batchId);
+        } catch (e) {
+            try {
+                await walletStorage.cancelBatchAsync(batchId);
+            } catch (err) {
+                console.log(err);
+            }
+            throw e;
+        }
+    };
+
+    let identity;
+    try {
+        identity = await walletStorage.readKeyAsync(constants.IDENTITY);
+    } catch (e) {
+        identity = undefined;
+    }
+
+    if (identity && identity.did === did && identity.walletStatus === walletStatus) {
+        return;
+    }
+
+    await utils.retryAsyncFunction(_setStoredDID, 3, 100);
+}
         }
 
         await this.oneTimeSetup(this.walletJustCreated);
