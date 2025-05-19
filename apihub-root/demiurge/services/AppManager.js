@@ -717,7 +717,7 @@ class AppManager {
             shouldPersist = true;
         }
         if (shouldPersist) {
-            await storeDID(didDocument.getIdentifier().replaceAll("@", "/"));
+            await storeDID(didDocument.getIdentifier());
 /**
  * Stores the DID (Decentralized Identifier) and wallet status in the wallet storage.
  * This function attempts to set the DID as the main DID and store it along with the wallet status.
