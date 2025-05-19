@@ -140,13 +140,8 @@ const migrate = async (dbPath) => {
             dbName = await getDbName(dbPath, table.name);
             dbService.changeDBNameToLowerCaseAndValidate(dbName); 
         } catch (e) {
-            const name = decodeURIComponent(dbName.toLowerCase().replaceAll(':', '_').replaceAll(".", "-"));
-            if(name.includes(" ")) {
-                console.log(`Invalid db name: ${name}. Not supposed to have databases with spaces. Skipping...`);
-                continue;
-            }
-
-            throw e;
+            console.log(`Invalid db name: ${dbName}. Not compliant with couchdb names. Skipping...`);
+            continue;
         }
         
         await createCollection(dbPath, table.name, indexes);
