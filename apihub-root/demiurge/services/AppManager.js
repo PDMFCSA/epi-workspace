@@ -556,11 +556,9 @@ class AppManager {
     async walletInitialization() {
         try {
             this.encryptedSSOSecret = await getSSOSecret();
-            console.warn("Already present SSOSecret: " + this.encryptedSSOSecret);
         } catch (e) {
             console.log("generating new secret")
             this.encryptedSSOSecret = await putSSOSecret();
-            console.warn("SSOSecret: " + this.encryptedSSOSecret);
         }
 
         const versionlessSSI = keySSISpace.createVersionlessSSI(undefined, `/${env.appName}_${getSSODetectedId()}`, deriveEncryptionKey(this.encryptedSSOSecret));
@@ -569,12 +567,7 @@ class AppManager {
             const dsu = await loadWallet(this.encryptedSSOSecret);
             let envJson = await dsu.readFileAsync("environment.json");
             envJson = JSON.parse(envJson);
-            console.warn(JSON.stringify(envJson));
             env.WALLET_MAIN_DID = envJson.WALLET_MAIN_DID || envJson.mainAppDID;
-            if(!envJson.WALLET_MAIN_DID && envJson.mainAppDID) {
-                console.warn(`No WALLET_MAIN_DID found in environment.json, using mainAppDID: ${envJson.mainAppDID}`);
-            }
-
             env.enclaveKeySSI = envJson.enclaveKeySSI;
             env.enclaveType = envJson.enclaveType;
             env.enclaveDID = envJson.enclaveDID;
@@ -600,12 +593,9 @@ class AppManager {
 
 
             try {
-                console.log("Attempting to load the Main DSU with a fallback versionlessSSI");
                 const testVersionlessSSI = keySSISpace.createVersionlessSSI(undefined, `/${env.appName}_${getSSODetectedId().replaceAll("@", "/")}`, deriveEncryptionKey(this.encryptedSSOSecret));
                 mainDSU = await $$.promisify(resolver.loadDSU)(testVersionlessSSI);
-                console.log("Attempting to load the Main DSU with a fallback versionlessSSI successful");
             } catch (e) {
-                console.warn("Failed to load the Main DSU with a fallback versionlessSSI", e);
                 try {
                     console.log("Creating new Main DSU");
                     mainDSU = await $$.promisify(resolver.createDSUForExistingSSI)(versionlessSSI);
@@ -662,23 +652,17 @@ class AppManager {
 //third phase... create or recover Identity
     async createIdentity(userDetails) {
         const vaultDomain = await $$.promisify(scAPI.getVaultDomain)();
-        console.log(`Vault domain: ${vaultDomain}`);
         const config = openDSU.loadAPI("config");
-        console.log(`Config : ${JSON.stringify(config)} `);
         let appName = await $$.promisify(config.getEnv)("appName");
-        console.log(`Application Name: ${appName}`);
         let userId = `${appName}/${userDetails.username}`;
-        console.log(`User ID: ${userId}`);
         let didDocument;
         let shouldPersist = false;
         const mainDID = await scAPI.getMainDIDAsync();
-        console.log(`Main DID: ${mainDID}`);
 
   
         let initialiseIdentityModal;
 
         const healDID = async (didIdentifier) => {
-            console.log(`Healing DID: ${didIdentifier}`);
             try {
                 didDocument = await $$.promisify(w3cDID.resolveDID)(didIdentifier);
                 // try to sign with the DID to check if it's valid
@@ -686,7 +670,6 @@ class AppManager {
                 if (this.previousVersionWalletFound) {
                     shouldPersist = true;
                 }
-                console.log(`DID is valid. Persisting DID: ${didDocument.getIdentifier()}`);
             } catch (e) {
                 console.log(`Failed to resolve DID. Error: ${e.message}`)
                 let response = await fetch(`${window.location.origin}/resetUserDID/${vaultDomain}`, {method: "DELETE"});
@@ -709,10 +692,6 @@ class AppManager {
 
 
         if (mainDID) {
-            // if(mainDID.includes("@")) {
-            //     mainDID =  mainDID.replaceAll("@", "/");
-            //     console.log(`Main DID contained @ changing to ${mainDID}`);
-            // }
             await healDID(mainDID);
         } else {
             initialiseIdentityModal = await webSkel.showModal("create-identity-modal");
