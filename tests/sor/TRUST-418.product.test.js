@@ -9,11 +9,18 @@ const {FixedUrls} = require("../clients/FixedUrls");
 const {getRandomNumber} = require("../utils");
 const {constants} = require("../constants");
 const {AuditLogChecker} = require("../audit/AuditLogChecker");
+const fs = require("node:fs");
+const path = require("path");
+
+
 
 const isCI = !!process.env.CI; // works for travis, github and gitlab
 const multiplier = isCI ? 4 : 1;
 jest.setTimeout(multiplier * 60 * 1000);
 const timeoutBetweenTests = multiplier * 5 * 1000;
+const IMAGE = (fs.readFileSync(path.join(__dirname, "..", "resources", "product_photo.txt"), {encoding: 'utf-8'})).trim();
+const IMAGE2 = (fs.readFileSync(path.join(__dirname, "..", "resources", "product_photo2.txt"), {encoding: 'utf-8'})).trim();
+
 
 const testName = "TRUST-418";
 
@@ -118,7 +125,7 @@ describe(`${testName} Product`, () => {
             throw new Error(`Request should have failed with 422 status code when GTIN in parameter and body mismatch`);
         });
 
-        it("FAIL 422 - Should throw Unprocessable Entity when mandatory fields are empty (TRUST-69)", async () => {
+        it("FAIL 422 - Should throw Unprocessable Entity when mandatory fields are undefined (TRUST-69)", async () => {
             const {ticket} = UtilsService.getTicketId(expect.getState().currentTestName);
             const product = await ModelFactory.product(ticket);
             const mandatoryFields = ["productCode", "nameMedicinalProduct", "inventedName"];
@@ -141,6 +148,29 @@ describe(`${testName} Product`, () => {
             }
         });
 
+        it("FAIL 422 - Should throw Unprocessable Entity when mandatory fields are null (TRUST-69)", async () => {
+            const {ticket} = UtilsService.getTicketId(expect.getState().currentTestName);
+            const product = await ModelFactory.product(ticket);
+            const mandatoryFields = ["productCode", "nameMedicinalProduct", "inventedName"];
+
+            await AuditLogChecker.storeAuditLogSnapshot();
+            for (const field of mandatoryFields) {
+                const invalidProduct = {...product};
+                invalidProduct[field] = null; // getRandomNumber().toString();
+
+                try {
+                    await client.addProduct(invalidProduct.productCode, invalidProduct);
+                } catch (e) {
+                    const response = e?.response || {};
+                    expect(response.status).toEqual(422);
+                    expect(response.statusText).toEqual("Unprocessable Entity");
+                    await AuditLogChecker.assertAuditLogSnapshot();
+                    continue;
+                }
+                throw new Error(`Request should have failed with 422 status code when ${field} is null`);
+            }
+        });
+
         it("FAIL 422 - Should throw Unprocessable Entity when invalid property is provided (TRUST-410)", async () => {
             await AuditLogChecker.storeAuditLogSnapshot();
             const {ticket} = UtilsService.getTicketId(expect.getState().currentTestName);
@@ -155,6 +185,45 @@ describe(`${testName} Product`, () => {
                 return;
             }
             throw new Error("Request should have failed with 422 status code");
+        });
+
+        it.skip("FAIL 409 - Should throw Conflict when trying to create a duplicate product", async () => {
+            const {ticket} = UtilsService.getTicketId(expect.getState().currentTestName);
+            const product = await ModelFactory.product(ticket);
+
+            await client.addProduct(product.productCode, product);
+
+            try {
+                await client.addProduct(product.productCode, product);
+            } catch (e) {
+                const response = e?.response || {};
+                expect(response.status).toEqual(409);
+                return;
+            }
+            throw new Error("Request should have failed due to duplicate product");
+        });
+
+        it("SUCCESS 200 - Add a photo", async () => {
+            await AuditLogChecker.storeAuditLogSnapshot();
+            const {ticket} = UtilsService.getTicketId(expect.getState().currentTestName);
+            const product = await ModelFactory.product(ticket);
+            const res = await client.addProduct(product.productCode, product);
+            expect(res.status).toBe(200);
+
+            // Create image payload
+            const imagePayload = {
+                productCode: product.productCode,
+                imageData: IMAGE,
+            };
+
+            const photoRes = await client.addImage(product.productCode,imagePayload);
+            expect(photoRes.status).toBe(200);
+
+            const resPhoto = await client.getProductPhoto(product.productCode,undefined)
+            expect(resPhoto.data).toEqual(IMAGE); 
+            
+            await AuditLogChecker.assertImageAudit(constants.OPERATIONS.ADD_PRODUCT_PHOTO, product.productCode, IMAGE);
+
         });
 
     });
@@ -178,6 +247,42 @@ describe(`${testName} Product`, () => {
             const res = await client.addProduct(createdProduct.productCode, createdProduct);
             expect(res.status).toBe(200);
             product = createdProduct;
+        });
+
+        it("SUCCESS 200 - Should return the product according to the schema", async () => {
+            const {data, status} = await client.getProduct(product.productCode);
+            expect(status).toBe(200);
+
+            expect(data).toMatchObject({
+                productCode: expect.any(String),
+                internalMaterialCode: expect.any(String),
+                inventedName: expect.any(String),
+                nameMedicinalProduct: expect.any(String),
+                productRecall: expect.any(Boolean),
+                flagEnableAdverseEventReporting: expect.any(Boolean),
+                adverseEventReportingURL: expect.any(String),
+                flagEnableACFProductCheck: expect.any(Boolean),
+                acfProductCheckURL: expect.any(String),
+                patientSpecificLeaflet: expect.any(String),
+                healthcarePractitionerInfo: expect.any(String),
+                strengths: expect.arrayContaining([
+                    expect.objectContaining({
+                        substance: expect.any(String),
+                        strength: expect.any(String),
+                        // legalEntityName: expect.any(String),
+                    })
+                ]),
+                markets: expect.arrayContaining([
+                    expect.objectContaining({
+                        marketId: expect.any(String),
+                        nationalCode: expect.any(String),
+                        mahName: expect.any(String),
+                        legalEntityName: expect.any(String),
+                        mahAddress: expect.any(String),
+                    })
+                ]),
+            });
+
         });
 
         it("SUCCESS 200 - Should get a product properly", async () => {
@@ -241,7 +346,7 @@ describe(`${testName} Product`, () => {
             const getProductResponse = await client.getProduct(productUpdate.productCode);
             expect(getProductResponse.data).toMatchObject(productUpdate);
             expect(getProductResponse.data.version).toBeGreaterThan(version);
-            await AuditLogChecker.assertAuditLog(productUpdate.productCode,undefined, "PUT", constants.OPERATIONS.UPDATE_PRODUCT, product, productUpdate);
+            await AuditLogChecker.assertAuditLog(productUpdate.productCode, undefined, "PUT", constants.OPERATIONS.UPDATE_PRODUCT, product, productUpdate);
         });
 
         it("SUCCESS 200 - Should recall and unrecall a product properly (TRUST-352)", async () => {
@@ -249,7 +354,7 @@ describe(`${testName} Product`, () => {
             expect(data.productRecall).toBeFalsy();
 
             await client.updateProduct(product.productCode, new Product({...data, productRecall: true}));
-            await AuditLogChecker.assertAuditLog(product.productCode,undefined, "PUT", constants.OPERATIONS.UPDATE_PRODUCT, {
+            await AuditLogChecker.assertAuditLog(product.productCode, undefined, "PUT", constants.OPERATIONS.UPDATE_PRODUCT, {
                 ...data,
                 productRecall: false
             }, {...data, productRecall: true});
@@ -262,7 +367,7 @@ describe(`${testName} Product`, () => {
             const getAfterUpdateFalseRes = await client.getProduct(product.productCode);
             expect(getAfterUpdateFalseRes.data.productCode).toEqual(product.productCode);
             expect(getAfterUpdateFalseRes.data.productRecall).toBeFalsy();
-            await AuditLogChecker.assertAuditLog(product.productCode,undefined, "PUT", constants.OPERATIONS.UPDATE_PRODUCT, {
+            await AuditLogChecker.assertAuditLog(product.productCode, undefined, "PUT", constants.OPERATIONS.UPDATE_PRODUCT, {
                 ...data,
                 productRecall: true
             }, {...data, productRecall: false});
@@ -300,7 +405,7 @@ describe(`${testName} Product`, () => {
             const response = await client.getProduct(productCode);
             expect(response.data).toEqual(expect.objectContaining(updatedProduct));
             expect(response.data.markets).toMatchObject(updatedProduct.markets);
-            await AuditLogChecker.assertAuditLog(productCode,undefined, "PUT", constants.OPERATIONS.UPDATE_PRODUCT, data, updatedProduct);
+            await AuditLogChecker.assertAuditLog(productCode, undefined, "PUT", constants.OPERATIONS.UPDATE_PRODUCT, data, updatedProduct);
 
             const noMarketUpdate = new Product({
                 ...response.data,
@@ -310,7 +415,7 @@ describe(`${testName} Product`, () => {
             const noMarketsUpdateResponse = await client.getProduct(productCode);
             expect(noMarketsUpdateResponse.data).toEqual(expect.objectContaining(noMarketUpdate));
             expect(noMarketsUpdateResponse.data.markets).toEqual([]);
-            await AuditLogChecker.assertAuditLog(productCode,undefined, "PUT", constants.OPERATIONS.UPDATE_PRODUCT, updatedProduct, noMarketUpdate);
+            await AuditLogChecker.assertAuditLog(productCode, undefined, "PUT", constants.OPERATIONS.UPDATE_PRODUCT, updatedProduct, noMarketUpdate);
         });
 
         it("FAIL 422 - Should throw if GTIN in parameter and body mismatch on update (TRUST-181)", async () => {
@@ -400,6 +505,33 @@ describe(`${testName} Product`, () => {
                     await AuditLogChecker.assertAuditLog(expectedUpdates[index].productCode, undefined, "PUT", constants.OPERATIONS.UPDATE_PRODUCT, data, expectedUpdates[index]);
                 }
             }
+        });
+
+        it("SUCCESS 200 - Update a photo", async () => {
+
+            // Create image payload
+            let imagePayload = {
+                productCode: product.productCode,
+                imageData: IMAGE,
+            };
+
+            const photoRes = await client.addImage(product.productCode,imagePayload);
+            expect(photoRes.status).toBe(200);
+
+            const resPhoto = await client.getProductPhoto(product.productCode,undefined)
+            expect(resPhoto.data).toEqual(IMAGE); 
+
+            // Create new image payload
+            imagePayload.imageData= IMAGE2
+
+            const updatedPhotoRes = await client.updateImage(product.productCode,imagePayload);
+            expect(updatedPhotoRes.status).toBe(200);
+
+            const updatedResPhoto = await client.getProductPhoto(product.productCode,undefined)
+            expect(updatedResPhoto.data).toEqual(IMAGE2); 
+            
+            await AuditLogChecker.assertImageAudit(constants.OPERATIONS.UPDATE_PRODUCT_PHOTO, product.productCode, IMAGE2);
+
         });
 
     });

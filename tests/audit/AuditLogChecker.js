@@ -133,6 +133,23 @@ class AuditLogChecker {
 
         return audit;
     }
+    
+    /**
+     * Test the product image audit logs
+     * @param {string} reason - audit expected reason
+     * @param {string} gtin  - product gtin
+     * @param {string} image - expected image
+     */
+    static async assertImageAudit(reason, gtin, image){
+        const epiAuditResponse = await this.client.filterAuditLogs(constants.constants.AUDIT_LOG_TYPES.USER_ACCTION, undefined, 1, "timestamp > 0", "desc");
+        const audit = epiAuditResponse.data[0];
+        expect(audit.itemCode).toEqual(gtin);
+        expect(audit.reason).toEqual(reason);
+
+        const resImage = await this.client.getProductPhoto(gtin,audit.version)
+
+        expect(resImage.data).toEqual(image);
+    }
 }
 
 module.exports = {AuditLogChecker};

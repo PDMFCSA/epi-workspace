@@ -69,7 +69,7 @@ describe(`${testName} Batch`, () => {
             await AuditLogChecker.assertAuditLog(batch.productCode,batch.batchNumber, "POST", constants.OPERATIONS.CREATE_BATCH, undefined, batch);
         });
 
-        it("FAIL 422 - Should throw Unprocessable Entity when mandatory fields are empty (TRUST-110)", async () => {
+        it("FAIL 422 - Should throw Unprocessable Entity when mandatory fields are undefined (TRUST-110)", async () => {
             const {ticket} = UtilsService.getTicketId(expect.getState().currentTestName);
             const batch = await ModelFactory.batch(ticket, PRODUCT.productCode);
 
@@ -81,13 +81,35 @@ describe(`${testName} Batch`, () => {
 
                 try {
                     await client.addBatch(batch.productCode, batch.batchNumber, invalidBatch);
-                    throw new Error(`Request should have failed with 422 status code when ${field} is empty`);
+                    throw new Error(`Request should have failed with 422 status code when ${field} is undefined`);
                 } catch (e) {
                     const response = e?.response || {};
                     expect(response.status).toEqual(422);
                     expect(response.statusText).toEqual("Unprocessable Entity");
                     await AuditLogChecker.assertAuditLogSnapshot();
                 }
+            }
+        });
+
+        it("FAIL 422 - Should throw Unprocessable Entity when mandatory fields are null (TRUST-110)", async () => {
+            const {ticket} = UtilsService.getTicketId(expect.getState().currentTestName);
+            const batch = await ModelFactory.batch(ticket, PRODUCT.productCode);
+
+            const mandatoryFields = ["productCode", "batchNumber", "expiryDate"];
+            await AuditLogChecker.storeAuditLogSnapshot();
+            for (const field of mandatoryFields) {
+                const invalidBatch = {...batch};
+                invalidBatch[field] = null;
+                try {
+                    await client.addBatch(batch.productCode, batch.batchNumber, invalidBatch);
+                } catch (e) {
+                    const response = e?.response || {};
+                    expect(response.status).toEqual(422);
+                    expect(response.statusText).toEqual("Unprocessable Entity");
+                    await AuditLogChecker.assertAuditLogSnapshot();
+                    return;
+                }
+                throw new Error(`Request should have failed with 422 status code when ${field} is null`);
             }
         });
 
@@ -174,6 +196,23 @@ describe(`${testName} Batch`, () => {
             }
         });
 
+        it.skip("FAIL 422 - Should handle duplicated batch creation", async () => {
+            const {ticket} = UtilsService.getTicketId(expect.getState().currentTestName);
+            const batch = await ModelFactory.batch(ticket, PRODUCT.productCode);
+
+            const res = await client.addBatch(batch.productCode, batch.batchNumber, batch);
+            expect(res.status).toBe(200);
+
+            try {
+                await client.addBatch(batch.productCode, batch.batchNumber, batch);
+            } catch (e) {
+                const response = e?.response || {};
+                expect(422).toEqual(response.status);
+                return;
+            }
+            throw new Error("Request should have failed due to duplicate batch");
+        });
+
     });
 
     describe(`${batchUrl} (GET)`, () => {
@@ -186,6 +225,41 @@ describe(`${testName} Batch`, () => {
 
             const {data} = await client.getBatch(batch.productCode, batch.batchNumber);
             BATCH = data;
+        });
+
+        it("SUCCESS 200 - Should return the batch according to the schema", async () => {
+            const {data, status} = await client.getBatch(BATCH.productCode, BATCH.batchNumber);
+            expect(status).toBe(200);
+            expect(data).toMatchObject({
+                productCode: expect.any(String),
+                batchNumber: expect.any(String),
+                expiryDate: expect.any(String),
+                dateOfManufacturing: expect.any(String),
+                manufacturerName: expect.any(String),
+                manufacturerAddress1: expect.any(String),
+                manufacturerAddress2: expect.any(String),
+                manufacturerAddress3: expect.any(String),
+                manufacturerAddress4: expect.any(String),
+                manufacturerAddress5: expect.any(String),
+                batchRecall: expect.any(Boolean),
+                packagingSiteName: expect.any(String),
+                // importLicenseNumber: expect.any(String),
+                // epiLeafletVersion: expect.any(Number),
+                // flagEnableEXPVerifica3
+                //  tion: expect.any(Boolean),
+                // flagEnableExpiredEXPCheck: expect.any(Boolean),
+                // batchMessage: expect.any(String),
+                // flagEnableBatchRecallMessage: expect.any(Boolean),
+                // recallMessage: expect.any(String),
+                // flagEnableACFBatchCheck: expect.any(Boolean),
+                // acfBatchCheckURL: expect.any(String),
+                // flagEnableSNVerification: expect.any(Boolean),
+                // acdcAuthFeatureSSI: expect.any(String),
+                // snValidReset: expect.any(Boolean),
+                // snValid: expect.arrayContaining([
+                //     expect.any(String)
+                // ])
+            });
         });
 
         it("SUCCESS 200 - Should get a batch properly", async () => {

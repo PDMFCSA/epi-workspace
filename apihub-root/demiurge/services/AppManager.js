@@ -562,12 +562,12 @@ class AppManager {
         }
 
         const versionlessSSI = keySSISpace.createVersionlessSSI(undefined, `/${env.appName}_${getSSODetectedId()}`, deriveEncryptionKey(this.encryptedSSOSecret));
+        
         try {
             const dsu = await loadWallet(this.encryptedSSOSecret);
             let envJson = await dsu.readFileAsync("environment.json");
             envJson = JSON.parse(envJson);
-            console.log(envJson);
-            env.WALLET_MAIN_DID = envJson.WALLET_MAIN_DID;
+            env.WALLET_MAIN_DID = envJson.WALLET_MAIN_DID || envJson.mainAppDID;
             env.enclaveKeySSI = envJson.enclaveKeySSI;
             env.enclaveType = envJson.enclaveType;
             env.enclaveDID = envJson.enclaveDID;
@@ -582,6 +582,7 @@ class AppManager {
         try {
             mainDSU = await $$.promisify(resolver.loadDSU)(versionlessSSI);
         } catch (error) {
+            console.log("Failed to load the Main DSU", error);
             // if error is failed to fetch then show an alert and reload the page
             if (error.rootCause === openDSU.constants.ERROR_ROOT_CAUSE.NETWORK_ERROR) {
                 utils.renderToast("Network error", "error", "block_alert");
@@ -589,13 +590,21 @@ class AppManager {
                 $$.forceTabRefresh();
                 return;
             }
+
+
             try {
-                mainDSU = await $$.promisify(resolver.createDSUForExistingSSI)(versionlessSSI);
-                await $$.promisify(mainDSU.writeFile)('environment.json', JSON.stringify(env));
-                this.walletJustCreated = true;
+                const testVersionlessSSI = keySSISpace.createVersionlessSSI(undefined, `/${env.appName}_${getSSODetectedId().replaceAll("@", "/")}`, deriveEncryptionKey(this.encryptedSSOSecret));
+                mainDSU = await $$.promisify(resolver.loadDSU)(testVersionlessSSI);
             } catch (e) {
-                webSkel.notificationHandler.reportUserRelevantWarning("Failed to create the wallet", e);
-                return;
+                try {
+                    console.log("Creating new Main DSU");
+                    mainDSU = await $$.promisify(resolver.createDSUForExistingSSI)(versionlessSSI);
+                    await $$.promisify(mainDSU.writeFile)('environment.json', JSON.stringify(env));
+                    this.walletJustCreated = true;
+                } catch (e) {
+                    webSkel.notificationHandler.reportUserRelevantWarning("Failed to create the wallet", e);
+                    return;
+                }
             }
         }
 
@@ -650,6 +659,7 @@ class AppManager {
         let shouldPersist = false;
         const mainDID = await scAPI.getMainDIDAsync();
 
+  
         let initialiseIdentityModal;
 
         const healDID = async (didIdentifier) => {
@@ -670,7 +680,7 @@ class AppManager {
                     let mainEnc = await $$.promisify(scAPI.getMainEnclave)();
                     let keyS = await $$.promisify(mainEnc.getKeySSI)();
                     console.log(keyS.getIdentifier());
-                    didDocument = await $$.promisify(mainEnc.createIdentity)("ssi:name", vaultDomain, userId);
+                    didDocument = await $$.promisify(mainEnc.createIdentity)("ssi:name", vaultDomain, userId.replaceAll("@", "/"));
                     shouldPersist = true;
                     this.walletJustCreated = true;
                 } catch (e) {
@@ -678,11 +688,14 @@ class AppManager {
                 }
             }
         }
+
+
+
         if (mainDID) {
             await healDID(mainDID);
         } else {
             initialiseIdentityModal = await webSkel.showModal("create-identity-modal");
-            const didIdentifier = `did:ssi:name:${vaultDomain}:${userId}`;
+            const didIdentifier = `did:ssi:name:${vaultDomain}:${userId.replaceAll("@", "/")}`;
             await healDID(didIdentifier);
             shouldPersist = true;
         }
