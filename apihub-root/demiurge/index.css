@@ -1,6 +1,8 @@
 @import url('./assets/fonts/fontawesome/font-awesome.min.css');
 
 
+
+
 /* dm-sans-regular - latin-ext_latin */
 @font-face {
     font-family: 'DM Sans regular';
@@ -146,7 +148,7 @@ body {
 }
 
 .hidden {
-    display: none;
+    display: none !important;
 }
 
 .toast-container {
