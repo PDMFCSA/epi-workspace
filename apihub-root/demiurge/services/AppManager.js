@@ -567,6 +567,7 @@ class AppManager {
             const dsu = await loadWallet(this.encryptedSSOSecret);
             let envJson = await dsu.readFileAsync("environment.json");
             envJson = JSON.parse(envJson);
+            console.warn(`Reading environment from old wallet ` + JSON.stringify(envJson, null, 2))
             env.WALLET_MAIN_DID = envJson.WALLET_MAIN_DID || envJson.mainAppDID;
             env.enclaveKeySSI = envJson.enclaveKeySSI;
             env.enclaveType = envJson.enclaveType;
@@ -599,6 +600,7 @@ class AppManager {
                 try {
                     console.log("Creating new Main DSU");
                     mainDSU = await $$.promisify(resolver.createDSUForExistingSSI)(versionlessSSI);
+                    console.warn(`Writing environment to new wallet" ` + JSON.stringify(env, null, 2));
                     await $$.promisify(mainDSU.writeFile)('environment.json', JSON.stringify(env));
                     this.walletJustCreated = true;
                 } catch (e) {
