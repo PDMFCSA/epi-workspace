@@ -98,6 +98,7 @@ async function testSecretFromCommandLine() {
         const secretFolderContent = fs.readdirSync(secretsPath, {withFileTypes: true});
 
         for (let entry of secretFolderContent) {
+            let name = entry.name;
             try {
                 let name = entry.name;
                 const secretPath = path.join(secretsPath, name);
