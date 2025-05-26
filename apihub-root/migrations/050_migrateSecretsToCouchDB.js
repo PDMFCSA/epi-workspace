@@ -146,7 +146,7 @@ async function migrateSecretFile(file, encryptionKey){
     const fileName = file.name;
 
     try {
-        const secretPath = path.join(secretsPath, fileName);
+        const secretPath = path.join(SECRETS_PATH, fileName);
         const secretContent = fs.readFileSync(secretPath);
         const decryptedContent = decrypt(secretContent, encryptionKey);
 
@@ -200,7 +200,7 @@ async function migrateSecretsToCouchDB() {
     await createCollection(DB_NAME);
 
     for(const file of files) {
-        migrateSecretFile(file, encryptionKey);
+        await migrateSecretFile(file, encryptionKey);
     }
 
 
