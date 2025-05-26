@@ -189,8 +189,8 @@ async function migrateSecretsToCouchDB() {
     try {
         files = fs.readdirSync(SECRETS_PATH, {withFileTypes: true});
     } catch (e) {
-        console.error("Failed Secrets migration to Couch DB");
-        throw e;
+        console.error("No secrets folder found! Nothing to migrate! Exiting...");
+        return;
     }
 
 
