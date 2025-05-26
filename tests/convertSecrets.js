@@ -98,13 +98,17 @@ async function testSecretFromCommandLine() {
         const secretFolderContent = fs.readdirSync(secretsPath, {withFileTypes: true});
 
         for (let entry of secretFolderContent) {
-            let name = entry.name;
-            const secretPath = path.join(secretsPath, name);
-            const secretContent = fs.readFileSync(secretPath);
-            const b = decrypt(secretContent, encryptionKey);
-            fs.writeFileSync("./secrets/" + name.split(".")[0] + ".json", b, {flag:"w"});
-            
-            console.log(`${name} decrypted successfully!`);
+            try {
+                let name = entry.name;
+                const secretPath = path.join(secretsPath, name);
+                const secretContent = fs.readFileSync(secretPath);
+                const b = decrypt(secretContent, encryptionKey);
+                fs.writeFileSync("./secrets/" + name.split(".")[0] + ".json", b, {flag:"w"});
+                
+                console.log(`${name} decrypted successfully!`);
+            } catch (error) {
+                console.log(`Failed to decrypt ${name}!`);
+            }
         }
         
     } catch (error) {
