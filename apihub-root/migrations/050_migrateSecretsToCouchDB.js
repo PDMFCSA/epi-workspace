@@ -161,7 +161,7 @@ async function migrateSecretFile(file, encryptionKey){
         const secretContent = fs.readFileSync(secretPath);
         const decryptedContent = decrypt(secretContent, encryptionKey);
 
-        await insertSecretIntoCouchDB(DB_NAME, fileName, secretContent);
+        await insertSecretIntoCouchDB(fileName, secretContent);
     } catch (error) {
         console.log(`Error migrating ${fileName}:`, error);
     }
