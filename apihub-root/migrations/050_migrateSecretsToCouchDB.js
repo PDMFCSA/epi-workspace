@@ -135,11 +135,23 @@ const insertRecord = async (dbName, pk, value) => {
         if (!exists)
             throw new Error(`Database Doesn't exist: ${dbName}! Failed to migrate!`);
 
-        await dbService.insertDocument(dbName, pk, value)
+        await dbService.insertDocument(dbName, pk, {value: ArrayBuffertoBase64(value)})
     } catch (e) {
         console.log("Record Already exists!");
         // throw e
     }
+}
+
+function ArrayBuffertoBase64(buffer){
+    let binary = '';
+    const bytes = new Uint8Array(buffer);
+    const len = bytes.byteLength;
+    for (let i = 0; i < len; i++) {
+        binary += String.fromCharCode(bytes[i]);
+    }
+
+    const value = btoa(binary);   
+    return value
 }
 
 async function migrateSecretFile(file, encryptionKey){
