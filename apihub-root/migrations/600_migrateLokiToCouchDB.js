@@ -180,7 +180,8 @@ const migrateLokiToCouchDB = async () => {
         uri: config.db.uri,
         username: userName,
         secret: secret,
-        debug: config.db.debug
+        debug: config.db.debug,
+        readOnlyMode: process.env.READ_ONLY_MODE || false
     });
 
     let folders;
