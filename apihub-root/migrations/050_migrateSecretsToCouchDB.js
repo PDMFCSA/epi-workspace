@@ -207,8 +207,11 @@ async function migrateSecretsToCouchDB() {
 
     const key = await getEncryptionKey();
     const encryptionKey = Buffer.from(key, "base64");
-
-    await createCollection(DB_NAME);
+    try {
+        await createCollection(DB_NAME);
+    } catch (error) {
+        console.log("Error creating database ", DB_NAME, ": ", error);
+    }
 
     for(const file of files) {
         await migrateSecretFile(file, encryptionKey);
