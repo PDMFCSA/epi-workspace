@@ -475,6 +475,7 @@ async function migrateDSUFabricData(sharedEnclave) {
 }
 
 async function doDSUFabricMigration(sharedEnclave, force = false) {
+    console.log(`${force ? "Forced! " : ""}doDSUFabricMigration`);
     function showMigrationDialog() {
         // Check if the dialog already exists
         let dialog = document.getElementById('migrationDialog');
@@ -508,15 +509,23 @@ async function doDSUFabricMigration(sharedEnclave, force = false) {
     }
 
     if (!sharedEnclave) {
-        sharedEnclave = await $$.promisify(scAPI.getSharedEnclave)();
+        try {
+            console.log("getting shared enclave");
+            sharedEnclave = await $$.promisify(scAPI.getSharedEnclave)();
+        } catch (e){
+            console.warn("getting shared enclave");
+            throw e;
+        }
     }
     if (force) {
+        console.log("forcing DSU fabric migration");
         await migrateDSUFabricData(sharedEnclave);
     }
 
     let migrationStatus = await $$.promisify(webSkel.dsuFabricSorClient.getDSUFabricMigrationStatus)();
 
     if (migrationStatus === constants.MIGRATION_STATUS.NOT_STARTED) {
+        console.log("Migration starting");
         await migrateDSUFabricData(sharedEnclave);
     }
 
@@ -567,6 +576,7 @@ class AppManager {
             const dsu = await loadWallet(this.encryptedSSOSecret);
             let envJson = await dsu.readFileAsync("environment.json");
             envJson = JSON.parse(envJson);
+            console.warn(`Reading environment from old wallet ` + JSON.stringify(envJson, null, 2))
             env.WALLET_MAIN_DID = envJson.WALLET_MAIN_DID || envJson.mainAppDID;
             env.enclaveKeySSI = envJson.enclaveKeySSI;
             env.enclaveType = envJson.enclaveType;
@@ -599,6 +609,7 @@ class AppManager {
                 try {
                     console.log("Creating new Main DSU");
                     mainDSU = await $$.promisify(resolver.createDSUForExistingSSI)(versionlessSSI);
+                    console.warn(`Writing environment to new wallet" ` + JSON.stringify(env, null, 2));
                     await $$.promisify(mainDSU.writeFile)('environment.json', JSON.stringify(env));
                     this.walletJustCreated = true;
                 } catch (e) {
@@ -725,9 +736,11 @@ class AppManager {
         await webSkel.showLoading();
         let did;
         if (this.previousVersionWalletFound) {
+            console.log("Previous version wallet found");
             const userDetails = await utils.getUserDetails();
             did = await this.createIdentity(userDetails);
         } else {
+            console.log("Previous version wallet not found");
             did = await getStoredDID();
 
             if (!did) {
@@ -745,13 +758,36 @@ class AppManager {
             try {
                 credential = await GroupsManager.getInstance().getGroupCredential(`did:ssi:name:${domain}:${constants.EPI_ADMIN_GROUP}`);
             } catch (err) {
+                console.warn(`Failed to retrieve group credential: ${err}`);
                 //ignore for now...
             }
             getPermissionsWatcher(did, async () => {
-                await doDemiurgeMigration();
-                await doDSUFabricMigration();
-                await AuditService.getInstance().addAccessLog(did);
-                await webSkel.changeToDynamicPage(sourcePage, sourcePage);
+                try {
+                    console.log("Starting Demiurge Migration")
+                    await doDemiurgeMigration();
+                } catch (e) {
+                    console.warn(`Failed to migrate Demiurge: ${e}`);
+                }
+                try {
+                    console.log("Starting Demiurge Migration")
+                    await doDSUFabricMigration();
+                } catch (e) {
+                    console.warn(`Failed to migrate DSU Fabric: ${e}`);
+                }
+                try {
+                    console.log("adding access log for Demiurge Migration")
+                    await AuditService.getInstance().addAccessLog(did);
+                } catch (e) {
+                    console.warn(`Failed to add access log: ${e}`);
+                    throw e
+                }
+                try {
+                    console.log("triggering webskel change to dynamic page")
+                    await webSkel.changeToDynamicPage(sourcePage, sourcePage);
+                } catch (e) {
+                    console.warn(`Failed to trigger webskel change: ${e}`);
+                    throw e
+                }
             }, credential);
         } catch (err) {
             webSkel.notificationHandler.reportUserRelevantError("Failed to initialize wallet", err);
