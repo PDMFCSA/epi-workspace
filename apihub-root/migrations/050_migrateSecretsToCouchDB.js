@@ -3,7 +3,6 @@ const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
 const apihubModule = require("apihub");
-const { Entry } = require("selenium-webdriver/lib/logging");
 const config = apihubModule.getServerConfig();
 const apihubRootFolder = config.storage;
 
