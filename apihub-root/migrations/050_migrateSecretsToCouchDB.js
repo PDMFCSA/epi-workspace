@@ -185,6 +185,7 @@ async function migrateSecretsToCouchDB() {
         // continue with migration
     }
 
+    const readOnlyFlag = process.env.READ_ONLY_MODE || false;
     const userName = process.env.DB_USER || config.db.user;
     const secret = process.env.DB_SECRET || config.db.secret;
 
@@ -192,7 +193,8 @@ async function migrateSecretsToCouchDB() {
         uri: config.db.uri,
         username: userName,
         secret: secret,
-        debug: config.db.debug || false
+        debug: config.db.debug || false,
+        readOnlyMode: readOnlyFlag,
     });
 
     let files;
