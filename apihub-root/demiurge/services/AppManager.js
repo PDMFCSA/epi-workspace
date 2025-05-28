@@ -19,6 +19,8 @@ const apiKeySpace = openDSU.loadAPI("apiKey");
 
 const DEFAULT_PIN = "1qaz";
 
+let initialized = false;
+
 /**
  * @param {string} did - identifier of DIDDocument
  */
@@ -513,7 +515,6 @@ async function doDSUFabricMigration(sharedEnclave, force = false) {
             console.log("getting shared enclave");
             sharedEnclave = await $$.promisify(scAPI.getSharedEnclave)();
         } catch (e){
-            console.warn("getting shared enclave");
             throw e;
         }
     }
@@ -576,7 +577,6 @@ class AppManager {
             const dsu = await loadWallet(this.encryptedSSOSecret);
             let envJson = await dsu.readFileAsync("environment.json");
             envJson = JSON.parse(envJson);
-            console.warn(`Reading environment from old wallet ` + JSON.stringify(envJson, null, 2))
             env.WALLET_MAIN_DID = envJson.WALLET_MAIN_DID || envJson.mainAppDID;
             env.enclaveKeySSI = envJson.enclaveKeySSI;
             env.enclaveType = envJson.enclaveType;
@@ -609,7 +609,6 @@ class AppManager {
                 try {
                     console.log("Creating new Main DSU");
                     mainDSU = await $$.promisify(resolver.createDSUForExistingSSI)(versionlessSSI);
-                    console.warn(`Writing environment to new wallet" ` + JSON.stringify(env, null, 2));
                     await $$.promisify(mainDSU.writeFile)('environment.json', JSON.stringify(env));
                     this.walletJustCreated = true;
                 } catch (e) {
@@ -762,6 +761,9 @@ class AppManager {
                 //ignore for now...
             }
             getPermissionsWatcher(did, async () => {
+                if(initialized)
+                    return;
+
                 try {
                     console.log("Starting Demiurge Migration")
                     await doDemiurgeMigration();
@@ -781,6 +783,9 @@ class AppManager {
                     console.warn(`Failed to add access log: ${e}`);
                     throw e
                 }
+
+                initialized = true;
+
                 try {
                     console.log("triggering webskel change to dynamic page")
                     await webSkel.changeToDynamicPage(sourcePage, sourcePage);
@@ -788,6 +793,7 @@ class AppManager {
                     console.warn(`Failed to trigger webskel change: ${e}`);
                     throw e
                 }
+
             }, credential);
         } catch (err) {
             webSkel.notificationHandler.reportUserRelevantError("Failed to initialize wallet", err);
