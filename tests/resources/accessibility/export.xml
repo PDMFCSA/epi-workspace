@@ -30,7 +30,7 @@
                 <tr>
                     <th scope="col"><b>Treatment regimen</b></th>
                     <th scope="col"><b>Weeks 1 - 2</b></th>
-                    <th><b>Weeks 3 - 4</b></th>
+                    <th scope="col"><b>Weeks 3 - 4</b></th>
                     <th scope="col"><b>Maintenance Dose</b></th>
                 </tr>
             </thead>
@@ -96,7 +96,7 @@
                 <tr>
                     <th scope="col" width="30%"><b>Drugs that increase the concentration of lamotrigine</b></th>
                     <th scope="col" width="40%"><b>Drugs that decrease the concentration of lamotrigine</b></th>
-                    <th width="30%"><b>Drugs that have little or no effect on the concentration of lamotrigine</b></th>
+                    <th scope="col" width="30%"><b>Drugs that have little or no effect on the concentration of lamotrigine</b></th>
                 </tr>
             </thead>
             <tr>
