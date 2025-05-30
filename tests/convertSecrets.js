@@ -123,9 +123,9 @@ async function testSecretFromCommandLine() {
 
         if(base) {
             const base64Data = Base64toArrayBuffer(base);
-            const b = decrypt(secretContent, encryptionKey);
-            fs.writeFileSync("./secrets/" +  "test.json", b, {flag:"w"});
-            console.log(`${name} decrypted successfully!`);
+            const b = decrypt(base64Data, encryptionKey);
+            fs.writeFileSync("./test.json", b, {flag:"w"});
+            console.log(`base 64 decrypted successfully!`);
         }
         
     } catch (error) {
