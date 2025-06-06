@@ -123,7 +123,7 @@ const recreateMetadataFixedUrl = async (tableName, domain, subdomain) => {
     let count = 0;
 
     for (let record of records) { 
-        console.log(`Processing record ${count + 1} of ${records.length}`);
+        console.log(`Processing record ${++count} of ${records.length}`);
         try {
             await fixedUrlUtils.registerLeafletMetadataFixedUrlByDomainAsync(domain, subdomain, record.productCode, record.batchNumber || undefined);  
             await fixedUrlUtils.deactivateMetadataFixedUrl(undefined, "metadata", domain, record.productCode, record.batchNumber || undefined, undefined, undefined, undefined);
