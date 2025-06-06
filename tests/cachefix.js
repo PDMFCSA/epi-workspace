@@ -120,20 +120,20 @@ const recreateMetadataFixedUrl = async (tableName, domain, subdomain) => {
 
     let fixedUrlUtils = require("../gtin-resolver/lib/mappings/utils.js");
 
-    let count = 0;
+    for(let i = 0; i < records.length; i++) {
+        console.log(`Processing record ${i} of ${records.length}`);
+        console.log("Product Code: ", records[i].productCode);
+        if(tableName === "batches") console.log("Batch Number: ", records[i].batchNumber);
+        console.log("Domain: ", domain , " / ", subdomain);
 
-    for (let record of records) { 
-        count++;
-        console.log(`Processing record ${count} of ${records.length}`);
         try {
-            await fixedUrlUtils.registerLeafletMetadataFixedUrlByDomainAsync(domain, subdomain, record.productCode, record.batchNumber || undefined);  
-            await fixedUrlUtils.deactivateMetadataFixedUrl(undefined, "metadata", domain, record.productCode, record.batchNumber || undefined, undefined, undefined, undefined);
-            await fixedUrlUtils.activateMetadataFixedUrl(undefined, "metadata", domain, record.productCode, record.batchNumber || undefined, undefined, undefined, undefined);
+            await fixedUrlUtils.registerLeafletMetadataFixedUrlByDomainAsync(domain, subdomain, records[i].productCode, records[i].batchNumber || undefined);  
+            await fixedUrlUtils.deactivateMetadataFixedUrl(undefined, "metadata", domain, records[i].productCode, records[i].batchNumber || undefined, undefined, undefined, undefined);
+            await fixedUrlUtils.activateMetadataFixedUrl(undefined, "metadata", domain, records[i].productCode, records[i].batchNumber || undefined, undefined, undefined, undefined);
         } catch (e) {
             console.error("Failed to restore metadata fixed url: ", record, "/n",  e);
         }
     }
-
 
     console.log(`Restored ${records.length} metadata fixed URLS for table ${tableName}`)
 }
