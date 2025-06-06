@@ -104,6 +104,8 @@ const recreateMetadataFixedUrl = async (tableName, domain, subdomain) => {
             }
         }
 
+        console.log(`Fetched ${allRecords.length} records from table ${tableName}`);
+
         return allRecords;
     }
 
@@ -118,9 +120,10 @@ const recreateMetadataFixedUrl = async (tableName, domain, subdomain) => {
 
     let fixedUrlUtils = require("../gtin-resolver/lib/mappings/utils.js");
 
-    console.log(fixedUrlUtils)
+    let count = 0;
 
     for (let record of records) { 
+        console.log(`Processing record ${count + 1} of ${records.length}`);
         try {
             await fixedUrlUtils.registerLeafletMetadataFixedUrlByDomainAsync(domain, subdomain, record.productCode, record.batchNumber || undefined);  
             await fixedUrlUtils.deactivateMetadataFixedUrl(undefined, "metadata", domain, record.productCode, record.batchNumber || undefined, undefined, undefined, undefined);
