@@ -40,6 +40,7 @@ export class PreviewEpiModal {
         const controlSubstances = document.querySelectorAll(".controlled-substance");
         if(controlSubstances){
             this.addControlledSymbolToProductName();
+            // this.addControlledSymbolToProductDescription();
             controlSubstances.forEach((controlSubstance) => {
             const img = document.createElement('img');
             img.src = 'assets/images/controlled_substance.svg';
@@ -59,5 +60,28 @@ export class PreviewEpiModal {
         svg.className = 'controlled-substance-header controlled-substance';
         svg.innerHTML= svgText;
         prodName.prepend(svg);
+    }
+
+    upperCaseProductDescriptionProductName(text, searchText) {
+        let regex = new RegExp(`(?<=\\b)${searchText}(?=\\b)`, "gi");
+        return text.replace(regex, (match) => `<span class="controlled-substance-description">${match.toUpperCase()}</span>`);
+    }
+
+    /**
+     * Add the controlled substance symbol to the product description
+     */
+    async addControlledSymbolToProductDescription() {
+    const controlSubstances = document.querySelectorAll(".controlled-substance-description");
+    if(controlSubstances){
+        controlSubstances.forEach(async (controlSubstance) => {
+        const response = await fetch('images/controlled_substance.svg');
+        const svgText = await response.text();
+        const tempSVG = document.createElement('div')
+        tempSVG.innerHTML= svgText;
+        const svg = tempSVG.firstElementChild;
+        svg.alt = 'Controlled substance in Canada';
+        controlSubstance.prepend(svg);
+        })
+    }
     }
 }

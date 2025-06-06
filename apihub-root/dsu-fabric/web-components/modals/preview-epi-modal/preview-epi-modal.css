@@ -6,6 +6,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     margin: 0;
+    text-transform: uppercase;
 }
 
 #leaflet-content .table-container {
@@ -357,6 +358,9 @@ video {
     margin: 0 auto;
 }
 
+.controlled-substance{
+    display: inline-block;
+}
 
 .controlled-substance-header {
     display: flex;
