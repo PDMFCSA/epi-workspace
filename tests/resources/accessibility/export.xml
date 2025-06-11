@@ -90,66 +90,68 @@
         </table>
         <br />
         <br />
-        <table cellspacing="0" border="1" width="100%">
-            <caption>Because of a risk of rash, the initial dose and subsequent dose escalation should not be exceeded (see <i> Warnings and Precautions</i>).</caption>
-            <thead>
+        <section level="2">
+            <table cellspacing="0" border="1" width="100%">
+                <caption><b>Table inside subsection.</b> Because of a risk of rash, the initial dose and subsequent dose escalation should not be exceeded (see <i> Warnings and Precautions</i>)</caption>
+                <thead>
+                    <tr>
+                        <th scope="col" width="30%"><b>Drugs that increase the concentration of lamotrigine</b></th>
+                        <th scope="col" width="40%"><b>Drugs that decrease the concentration of lamotrigine</b></th>
+                        <th scope="col" width="30%"><b>Drugs that have little or no effect on the concentration of lamotrigine</b></th>
+                    </tr>
+                </thead>
                 <tr>
-                    <th scope="col" width="30%"><b>Drugs that increase the concentration of lamotrigine</b></th>
-                    <th scope="col" width="40%"><b>Drugs that decrease the concentration of lamotrigine</b></th>
-                    <th scope="col" width="30%"><b>Drugs that have little or no effect on the concentration of lamotrigine</b></th>
+                    <th scope="row" width="30%" rowspan="2">
+                        <p>Valproate</p>
+                    </th>
+                    <td valign="top" width="40%">
+                        <p>Atazanavir/ritonavir</p>
+                        <p>Carbamazepine</p>
+                        <p page="2">
+                            <figure page="2" class="Figure">
+                                <img src="table_img_a.jpg" alt="Description of sample image A" />
+                                <p page="2">
+                                    <b>Table Image A </b>
+                                </p>
+                            </figure>
+                        </p>
+                    </td>
+                    <td width="30%">
+                        <p>Aripiprazole</p>
+                        <p>Bupropion</p>
+                    </td>
                 </tr>
-            </thead>
-            <tr>
-                <th scope="row" width="30%" rowspan="2">
-                    <p>Valproate</p>
-                </th>
-                <td valign="top" width="40%">
-                    <p>Atazanavir/ritonavir</p>
-                    <p>Carbamazepine</p>
-                    <p page="2">
+                <tr>
+                    <td valign="top" width="40%">
+                        <p>Ethinylestradiol / levonorgestrel combination</p>
+                        <p>Lopinavir/ritonavir</p>
+                        <p>Phenobarbitone</p>
+                        <p>Phenytoin</p>
+                        <p>Primidone</p>
+                        <p>Rifampicin</p>
                         <figure page="2" class="Figure">
-                            <img src="table_img_a.jpg" alt="Description of sample image A" />
+                            <img src="table_img_b.jpg" alt="Description of sample image B" />
                             <p page="2">
-                                <b>Table Image A </b>
+                                <b>Table Image B</b>
                             </p>
                         </figure>
-                    </p>
-                </td>
-                <td width="30%">
-                    <p>Aripiprazole</p>
-                    <p>Bupropion</p>
-                </td>
-            </tr>
-            <tr>
-                <td valign="top" width="40%">
-                    <p>Ethinylestradiol / levonorgestrel combination</p>
-                    <p>Lopinavir/ritonavir</p>
-                    <p>Phenobarbitone</p>
-                    <p>Phenytoin</p>
-                    <p>Primidone</p>
-                    <p>Rifampicin</p>
-                    <figure page="2" class="Figure">
-                        <img src="table_img_b.jpg" alt="Description of sample image B" />
-                        <p page="2">
-                            <b>Table Image B</b>
-                        </p>
-                    </figure>
-                </td>
-                <td width="30%">
-                    <p>Felbamate Gabapentin</p>
-                    <p>Lacosamide</p>
-                    <p>Levetiracetam</p>
-                    <p>Lithium</p>
-                    <p>Olanzapine</p>
-                    <p>Oxcarbazepine</p>
-                    <p>Paracetamol</p>
-                    <p>Perampanel</p>
-                    <p>Pregabalin</p>
-                    <p>Topiramate</p>
-                    <p>Zonisamide</p>
-                </td>
-            </tr>
-        </table>
+                    </td>
+                    <td width="30%">
+                        <p>Felbamate Gabapentin</p>
+                        <p>Lacosamide</p>
+                        <p>Levetiracetam</p>
+                        <p>Lithium</p>
+                        <p>Olanzapine</p>
+                        <p>Oxcarbazepine</p>
+                        <p>Paracetamol</p>
+                        <p>Perampanel</p>
+                        <p>Pregabalin</p>
+                        <p>Topiramate</p>
+                        <p>Zonisamide</p>
+                    </td>
+                </tr>
+            </table>
+        </section>
     </section>
 
     <section level="1" page="3">
