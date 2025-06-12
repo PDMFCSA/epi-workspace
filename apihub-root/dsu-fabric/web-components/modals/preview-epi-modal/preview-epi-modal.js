@@ -5,7 +5,7 @@ export class PreviewEpiModal {
         this.epiData = JSON.parse(decodeURIComponent(this.element.getAttribute("data-epidata")));
         this.previewModalTitle = this.epiData.previewModalTitle;
         this.productInventedName = this.epiData.inventedName;
-        this.productNameMedicinalProduct = this.epiData.nameMedicinalProduct;
+        this.productNameMedicinalProduct = this.upperCaseProductDescriptionProductName(this.epiData.nameMedicinalProduct, this.productInventedName);
         this.textDirection = this.epiData.textDirection;
         this.epiLanguage = this.epiData.epiLanguage;
         this.invalidate();
@@ -38,33 +38,40 @@ export class PreviewEpiModal {
 
     renderControlledSubstancesSymbol() {
         const controlSubstances = document.querySelectorAll(".controlled-substance");
-        if(controlSubstances){
+        if(controlSubstances.length != 0){
+            this.setupDescriptionProductName(this.productNameMedicinalProduct, this.productInventedName) 
             this.addControlledSymbolToProductName();
-            // this.addControlledSymbolToProductDescription();
+            this.addControlledSymbolToProductDescription();
             controlSubstances.forEach((controlSubstance) => {
             const img = document.createElement('img');
             img.src = 'assets/images/controlled_substance.svg';
-            img.alt = 'Controlled substance in Canada';
+            img.alt = 'Controlled substance';
             img.className = 'controlled-substance-p '
             controlSubstance.insertBefore(img, controlSubstance.firstChild);
             })
         }
     }
+
+    /**
+     * If controlled substance detected wrappe it in a span
+     * @param {string} description 
+     * @param {string} title 
+     * @returns 
+     */
+    setupDescriptionProductName(description, title) {
+        let regex = new RegExp(`(?<=\\b)${title}(?=\\b)`, "gi");
+        let productDescription =  description.replace(regex, (match) => `<span class="controlled-substance-description">${match.toUpperCase()}</span>`);
+        document.querySelector('.product-description').innerHTML = productDescription;
+    }
       
     async addControlledSymbolToProductName() {
         const prodName = document.querySelector(".product-name");
-        const response = await fetch('assets/images/controlled_substance.svg');
-        const svgText = await response.text();
-        const svg = document.createElement('div')
-        svg.alt = 'Controlled substance in Canada';
-        svg.className = 'controlled-substance-header controlled-substance';
-        svg.innerHTML= svgText;
-        prodName.prepend(svg);
-    }
-
-    upperCaseProductDescriptionProductName(text, searchText) {
-        let regex = new RegExp(`(?<=\\b)${searchText}(?=\\b)`, "gi");
-        return text.replace(regex, (match) => `<span class="controlled-substance-description">${match.toUpperCase()}</span>`);
+        const img = document.createElement('img');
+        img.src = 'assets/images/controlled_substance_contrast.svg';
+        img.alt = 'Controlled Substance';
+        img.className = 'controlled-substance-p '
+        prodName.insertBefore(img, prodName.firstChild);
+        prodName.classList.add("controlled-substance-header")
     }
 
     /**
@@ -72,16 +79,19 @@ export class PreviewEpiModal {
      */
     async addControlledSymbolToProductDescription() {
     const controlSubstances = document.querySelectorAll(".controlled-substance-description");
-    if(controlSubstances){
+    if(controlSubstances.length != 0){
         controlSubstances.forEach(async (controlSubstance) => {
-        const response = await fetch('images/controlled_substance.svg');
-        const svgText = await response.text();
-        const tempSVG = document.createElement('div')
-        tempSVG.innerHTML= svgText;
-        const svg = tempSVG.firstElementChild;
-        svg.alt = 'Controlled substance in Canada';
-        controlSubstance.prepend(svg);
+            const img = document.createElement('img');
+            img.src = 'assets/images/controlled_substance_contrast.svg';
+            img.alt = 'Controlled Substance';
+            img.className = 'controlled-substance-p '
+            controlSubstance.insertBefore(img, controlSubstance.firstChild);
         })
     }
+    }
+
+    upperCaseProductDescriptionProductName(text, searchText) {
+        let regex = new RegExp(`(?<=\\b)${searchText}(?=\\b)`, "gi");
+        return text.replace(regex, (match) => `${match.toUpperCase()}`);
     }
 }
