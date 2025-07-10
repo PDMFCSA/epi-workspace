@@ -80,6 +80,7 @@
     "jsdoc-mermaid": "^1.0.0",
     "json-2-csv": "^5.5.9",
     "json2md": "^2.0.2",
+    "libxmljs2": "^0.37.0",
     "playwright": "^1.51.1",
     "selenium-webdriver": "^4.29.0",
     "swagger-client": "^3.34.3",
