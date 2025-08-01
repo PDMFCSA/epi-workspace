@@ -6,11 +6,6 @@ const nano = require('nano');
 
 let env = {};
 
-const constants = {
-    PRODUCT_DSU_MOUNT_POINT: "/product",
-    BATCH_DSU_MOUNT_POINT: "/batch",
-}
-
 const setEnvVars = async () => {
     try {
         const envFile = fs.readFileSync(path.join("../env.json"), 'utf8')
@@ -32,10 +27,6 @@ const EnclaveFacade = require("loki-enclave-facade");
 const DBService = EnclaveFacade.DBService;
 
 const SmartUrl = require("opendsu").loadApi("utils").SmartUrl;
-
-const openDSU = require("opendsu");
-const keyssiSpace = openDSU.loadApi("keyssi");
-const resolver = openDSU.loadAPI("resolver");
 
 let dbService;
 
@@ -120,17 +111,6 @@ const getAllRecords = async (dbName, tableName, limit = 250) => {
     return allRecords;
 }
 
-const createGTIN_SSI = function(domain, bricksDomain, gtin, batch) {
-    console.log(`New GTIN_SSI in domain:${domain} and bricksDomain:${bricksDomain}`);
-    let hint = {avoidRandom : true};
-    if (typeof bricksDomain !== "undefined") {
-        hint[openDSU.constants.BRICKS_DOMAIN_KEY] = bricksDomain;
-    }
-    hint = JSON.stringify(hint);
-    let realSSI = keyssiSpace.createArraySSI(domain, [gtin, batch], 'v0', hint);
-
-    return realSSI;
-}
 
 const recreateFixedUrlsCache = async (tableName, domain, subdomain) => {
     console.log("====================================================================================================");
@@ -149,10 +129,8 @@ const recreateFixedUrlsCache = async (tableName, domain, subdomain) => {
     }
 
     let fixedUrlUtils = require("../gtin-resolver/lib/mappings/utils.js");
-    const resolve = $$.promisify(resolver.resolve);
 
     for(let i = 0; i < records.length; i++) {
-        console.log("====================================================================================================");
         console.log(`Processing record ${i} of ${records.length}`);
         console.log("Product Code: ", records[i].productCode);
         if(tableName === "batches") console.log("Batch Number: ", records[i].batchNumber);
@@ -165,10 +143,7 @@ const recreateFixedUrlsCache = async (tableName, domain, subdomain) => {
                 console.log(`Restoring Gtin Owner fixed url for \n Domain: ${domain}\n SubDomain: ${subdomain} \n Product code:${records[i].productCode}`);
                  await fixedUrlUtils.registerGtinOwnerFixedUrlByDomainAsync(domain, records[i].productCode);
             }
-
-
-            
-            
+        
             // para cada leaflet
             let leaflet_type= ""
             let market = ""
@@ -179,10 +154,9 @@ const recreateFixedUrlsCache = async (tableName, domain, subdomain) => {
         } catch (e) {
             console.error("Failed to restore metadata fixed url: ", JSON.stringify(records[i], null, 2), "/n",  e);
         }
-        console.log("====================================================================================================");
     }
 
-    console.log(`Restored ${records.length} fixed URLS for table ${tableName}`)
+    console.log(`Restored ${records.length} metadata fixed URLS for table ${tableName}`)
 
 
 }
