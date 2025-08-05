@@ -94,7 +94,9 @@ const getAllRecords = async (dbName, tableName, limit = 250) => {
             allRecords = allRecords.concat(result);
             
             if (allRecords.length < docCount) {
-                lastKey = result[result.length - 1].__key;
+                lastKey = allRecords.length;
+                console.log(`Last key: ${lastKey}`);
+                console.log(`${JSON.stringify(result[result.length - 1], null, 2)}`);
             } else {
                 hasMore = false;
             }
@@ -134,6 +136,10 @@ const removeFixedURLsCache = async (tableName, domain, subdomain) => {
         console.log("Failed to get records from table", dbName, error);
         records = [];
     }
+
+    console.log("------------------------------------------------------------------------");
+    console.log(`Total records found: ${new Set(records.map(record => record.pk)).size} / ${records.length}`);
+    console.log("------------------------------------------------------------------------");
 
     for (const record of records) {
         console.log(`Processing record ${record.pk}`);
