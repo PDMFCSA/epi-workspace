@@ -129,6 +129,7 @@ const removeFixedURLsCache = async (tableName, domain, subdomain) => {
     console.log("====================================================================================================");
 
     let dbName = "db_fixedurls-db_history"
+    let records;
 
     try {
         records = await getAllRecords(dbName, dbName);
@@ -137,11 +138,14 @@ const removeFixedURLsCache = async (tableName, domain, subdomain) => {
         records = [];
     }
 
+    let counter = 1;
+
     console.log("------------------------------------------------------------------------");
     console.log(`Total records found: ${new Set(records.map(record => record.pk)).size} / ${records.length}`);
     console.log("------------------------------------------------------------------------");
 
     for (const record of records) {
+        console.log(`Processing record ${counter++} of ${records.length}`);
         console.log(`Processing record ${record.pk}`);
         
         try {
