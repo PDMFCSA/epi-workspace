@@ -146,7 +146,7 @@ const removeFixedURLsCache = async (tableName, domain, subdomain) => {
 
     for (const record of records) {
         console.log(`Processing record ${counter++} of ${records.length}`);
-        console.log(`Processing record ${record.pk}`);
+        console.log(`PK: ${record.pk}`);
         
         try {
             await dbService.deleteDocument(dbName, record.pk)
