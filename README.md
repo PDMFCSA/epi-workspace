@@ -276,3 +276,7 @@ Subdomain: quality.epi.pla
 Vault: quality.vault.pla 
 
 
+### Leaflet Schema validation
+```sh
+$ npm run schema-validation -- pathToFile
+```
