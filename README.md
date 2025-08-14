@@ -277,6 +277,9 @@ Vault: quality.vault.pla
 
 
 ### Leaflet Schema validation
+The XSD template file is located in ./tests/resources/leaflet-schema.xsd
+
+To validate a leaflet file, just run the command
 ```sh
 $ npm run schema-validation -- pathToFile
 ```
