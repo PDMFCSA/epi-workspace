@@ -70,8 +70,20 @@ function getDecryptionParameters (encryptedData, authTagLength = 0) {
     return {iv, aad, tag, data};
 };
 
+function Base64toArrayBuffer(str){
+    const binaryString = atob(str); // Decode Base64 to binary string
+    const len = binaryString.length;
+    const bytes = new Uint8Array(len); // Create a Uint8Array
+    for (let i = 0; i < len; i++) {
+        bytes[i] = binaryString.charCodeAt(i); // Convert binary string to byte array
+    }
+    const buff = bytes.buffer; // Return as ArrayBuffer  
+    return Buffer.from(buff);
+}
+
 async function testSecretFromCommandLine() {
     let key = process.argv[2];
+    let base = process.argv[3];
 
     if (!key) {
         try {
@@ -93,24 +105,33 @@ async function testSecretFromCommandLine() {
     try {
         let encryptionKey = Buffer.from(key, "base64");
 
-        const secretsPath = path.join(__dirname, "secrets");
 
-        const secretFolderContent = fs.readdirSync(secretsPath, {withFileTypes: true});
+        if(!base) {
+            const secretsPath = path.join(__dirname, "secrets");
+            const secretFolderContent = fs.readdirSync(secretsPath, {withFileTypes: true});
+    
+            for (let entry of secretFolderContent) {
+                let name = entry.name;
+                const secretPath = path.join(secretsPath, name);
+                const secretContent = fs.readFileSync(secretPath);
+                const b = decrypt(secretContent, encryptionKey);
+                fs.writeFileSync("./secrets/" + name.split(".")[0] + ".json", b, {flag:"w"});
+                
+                console.log(`${name} decrypted successfully!`);
+            }
+        }
 
-        for (let entry of secretFolderContent) {
-            let name = entry.name;
-            const secretPath = path.join(secretsPath, name);
-            const secretContent = fs.readFileSync(secretPath);
-            const b = decrypt(secretContent, encryptionKey);
-            fs.writeFileSync("./secrets/" + name.split(".")[0] + ".json", b, {flag:"w"});
-            
-            console.log(`${name} decrypted successfully!`);
+        if(base) {
+            const base64Data = Base64toArrayBuffer(base);
+            const b = decrypt(base64Data, encryptionKey);
+            fs.writeFileSync("./test.json", b, {flag:"w"});
+            console.log(`base 64 decrypted successfully!`);
         }
         
     } catch (error) {
         return console.log(`Error decrypting secret: ${error.message}`);
     }
-    console.log("adminApiKeys.secret decrypted successfully!");
+    console.log("Finished running script successfully!");
 }
 
 testSecretFromCommandLine().then(_ => console.log("All secrets decrypted successfully!")).catch(e => console.error(e));
