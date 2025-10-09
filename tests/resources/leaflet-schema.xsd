@@ -22,12 +22,39 @@
 
     <xs:attributeGroup name="listAttributes">
         <xs:attributeGroup ref="basicAttributes"/>
-        <xs:attribute name="data-type" type="xs:string" />
+        <xs:attribute name="type">
+            <xs:simpleType>
+                <xs:restriction base="xs:string">
+                <xs:pattern value="(1|a|A|i|I)" />
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="data-type">
+            <xs:simpleType>
+                <xs:restriction base="xs:string">        
+                   <xs:pattern value="(decimal|decimal-leading-zero|lower-roman|upper-roman|lower-alpha|upper-alpha|lower-latin|upper-latin|armenian|georgian|hebrew|cjk-ideographic|hiragana|katakana|hiragana-iroha|katakana-iroha|none)" />
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="style">
+            <xs:simpleType>
+                <xs:restriction base="xs:string">
+                    <xs:pattern value="list-style-type\s*:\s*(disc|circle|square|none)\s*;?" />
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
     </xs:attributeGroup>
 
     <xs:attributeGroup name="listLineAttributes">
         <xs:attributeGroup ref="basicAttributes"/>
         <xs:attribute name="data-enum" type="xs:string" />
+        <xs:attribute name="style">
+            <xs:simpleType>
+                <xs:restriction base="xs:string">
+                    <xs:pattern value="list-style-type\s*:\s*(disc|circle|square|none)\s*;?" />
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
     </xs:attributeGroup>
 
     <xs:attributeGroup name="tableAttributes">
@@ -97,6 +124,7 @@
             <xs:element name="ul" type="listType"/>
             <xs:element name="ol" type="listType"/>
             <xs:element name="br" type="xs:string"/>
+            <xs:element name="hr" type="xs:string"/>
             <xs:element name="table" type="tableType"/>
             <xs:element name="img" type="imageType"/>
             <xs:element name="figure" type="blockContentType"/>
@@ -122,6 +150,7 @@
 		<xs:choice minOccurs="0" maxOccurs="unbounded">
 			<xs:element name="p"/>
     	    <xs:element name="br" type="xs:string" />
+            <xs:element name="hr" type="xs:string"/>
             <xs:element name="b" type="inlineTextType"/>
             <xs:element name="i" type="inlineTextType"/>
             <xs:element name="u" type="inlineTextType"/>
@@ -146,6 +175,7 @@
             <xs:element name="sub" type="inlineTextType"/>
             <xs:element name="sup" type="inlineTextType"/>
             <xs:element name="br" type="xs:string"/>
+            <xs:element name="hr" type="xs:string"/>
             <xs:element name="a" type="anchorType"/>
             <xs:element name="ul" type="listType"/>
             <xs:element name="ol" type="listType"/>
@@ -185,6 +215,7 @@
             <!-- Block elements -->
             <xs:element name="p" type="pType"/>
             <xs:element name="br" type="xs:string"/>
+            <xs:element name="hr" type="xs:string"/>
 
             <xs:element name="div" type="blockContentType"/>
             <xs:element name="header" type="headerType"/>
@@ -224,6 +255,7 @@
             <!-- Block elements -->
             <xs:element name="p" type="pType"/>
             <xs:element name="br" type="xs:string"/>
+            <xs:element name="hr" type="xs:string"/>
             <xs:element name="div" type="blockContentType"/>
             
             <!-- Lists -->
@@ -302,6 +334,7 @@
             <xs:element name="p" type="pType"/>
             <xs:element name="div" type="blockContentType"/>
             <xs:element name="br" type="xs:string"/>
+            <xs:element name="hr" type="xs:string"/>
             <xs:element name="ul" type="listType"/>
             <xs:element name="ol" type="listType"/>
             <xs:element name="table" type="tableType"/>
