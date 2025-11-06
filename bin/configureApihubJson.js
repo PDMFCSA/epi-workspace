@@ -24,7 +24,10 @@ const localValues = {
     db_user: "admin",
     db_secret: "adminpw",
     db_debug: true,
-    oauth_logging: true
+    oauth_logging: true,
+    request_timeout: 300000,
+    timeout: 300000,
+    keep_alive: 300000
 };
 
 

@@ -110,4 +110,7 @@
     "secret": "${db_secret}",
     "debug": ${db_debug}
   }
+  "requestTimeout": ${request_timeout},
+  "timeout": ${timeout},
+  "keepAliveTimeout": ${keep_alive}
 }
