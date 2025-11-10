@@ -28,6 +28,7 @@ const DBService = EnclaveFacade.DBService;
 const buildQueryParams = require("../gtin-resolver/lib/utils/buildQueryParams.js").buildQueryParams;
 
 const crypto = require("opendsu").loadAPI("crypto");
+const SmartUrl = require("opendsu").loadApi("utils").SmartUrl;
 
 let dbService;
 
@@ -74,7 +75,96 @@ const generateURL = (domain, leaflet_type, gtin, language, batchNumber) => {
   return `/leaflets/${domain}?${queryParams}`;
 }
 
-const reason = "Deleted Leaflet";
+const REASONS = {
+    DELETE_LEAFLET: "Deleted Leaflet",
+    CREATE_PRODUCT: "Created Product"
+} 
+
+const call = function(endpoints, body, callback){
+    function executeRequest(){
+        if(endpoints.length === 0){
+            const msg = `Not able to activate fixedUrl`;
+            console.log(msg);
+            return callback(new Error(msg));
+        }
+
+        let apihubEndpoint = endpoints.shift();
+        apihubEndpoint.doPut(body, {}, (err) => {
+        if (err) {
+            console.error(err);
+            //if we get error we try to make a call to other endpoint if any
+            executeRequest();
+        } else {
+            return callback(undefined, true);
+        }
+        });
+    }
+
+    executeRequest();
+}
+
+const getReplicasAsSmartUrls = function(targetDomain, callback){
+    const BDNS = require("opendsu").loadApi("bdns");
+    BDNS.getAnchoringServices(targetDomain, (err, endpoints)=> {
+        if (err) {
+            return callback(err);
+        }
+        let replicas = [];
+        for(let endpoint of endpoints){
+            replicas.push(new SmartUrl(endpoint));
+        }
+        return callback(undefined, replicas);
+    });
+}
+
+const getDeactivateRelatedFixedURLHandler = function(getReplicasFnc){
+    return function deactivateRelatedFixedUrl(domain, query, callback){
+        getReplicasFnc(domain, function(err, replicas){
+            if(replicas.length === 0){
+                const msg = `Not able to deactivate fixedUrls`;
+                console.log(msg);
+                return callback(new Error(msg));
+            }
+            let targets = [];
+            for(let replica of replicas){
+                targets.push(replica.concatWith("/deactivateFixedURL"));
+            }
+    
+            call(targets, `url like (${query})`, callback);
+        });
+    }
+}
+
+const getActivateRelatedFixedURLHandler = function (getReplicasFnc){
+    return function activateRelatedFixedUrl(domain, query, callback){
+        if(typeof callback === "undefined"){
+            callback = (err)=>{
+                if(err){
+                    console.error(err);
+                }
+            }
+        }
+
+        let next = async ()=>{
+            //we were able to commit the new changes then we should call the fixedUrl endpoints
+            getReplicasFnc(domain, function(err, replicas){
+                if(replicas.length === 0){
+                    const msg = `Not able to activate fixedUrls`;
+                    console.log(msg);
+                    return callback(new Error(msg));
+                }
+                let targets = [];
+                for(let replica of replicas){
+                    targets.push(replica.concatWith("/activateFixedURL"));
+                }
+
+                call(targets, `url like (${query})`, callback);
+            });
+        }
+
+        next();
+    }
+}
 
 const monitorCache = async () => {
     try {
@@ -107,19 +197,27 @@ const monitorCache = async () => {
 
             const isBatch = record.batchNumber !== undefined && record.batchNumber !== null && record.batchNumber !== ""
 
-            if(record.reason === reason && isBatch) {
+            if(record.reason === REASONS.DELETE_LEAFLET && isBatch) {
+                console.log(`Removing Batch leaflet cache for product: ${record.itemCode} batch: ${record.batchNumber}`);
                 for(leaf of record.details) {
                     console.log(JSON.stringify(leaf, null, 2));
                     const url = generateURL(domain, leaf.epiType, record.itemCode, leaf.epiLanguage, record.batchNumber);
                     const encoded = crypto.base64URLEncode(url);
-                    console.log("Deleting old fixed url cache: ", url);
+                    console.log("URL to be deleted from cache: ", url);
                     console.log("Converting URL to base64URL:", encoded)
 
                     const read = await dbService.readDocument(dbFixedName, encoded);
-                    console.log("Old fixed url cache:", read)
+                    console.log("Verifying cache is in the system:", read)
                     await dbService.deleteDocument(dbFixedName, read.pk)
-                    console.log("Deleted old fixed url cache:", read.pk)
+                    console.log("Deleted cache for key:", read.pk)
                 }
+            }
+
+            if(record.reason === REASONS.CREATE_PRODUCT){
+                console.log(`"Creating cache for product: ${record.itemCode}`)
+                const query = `^/metadata/leaflet/.*\?gtin=${record.itemCode}$`
+                await $$.promisify(getDeactivateRelatedFixedURLHandler(getReplicasAsSmartUrls))(domain, query);
+                await $$.promisify(getActivateRelatedFixedURLHandler(getReplicasAsSmartUrls))(domain, query);
             }
            
             console.log("Finished processing");
