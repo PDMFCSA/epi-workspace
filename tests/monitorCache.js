@@ -78,7 +78,8 @@ const generateURL = (domain, leaflet_type, gtin, language, batchNumber) => {
 const REASONS = {
     DELETE_LEAFLET: "Deleted Leaflet",
     CREATE_PRODUCT: "Created Product",
-    ADDED_LEAFLET: "Added Leaflet"
+    ADDED_LEAFLET: "Added Leaflet",
+    UPDATE_PRODUCT: "Update Product"
 } 
 
 const call = function(endpoints, body, callback){
@@ -214,7 +215,7 @@ const monitorCache = async () => {
                 }
             }
 
-            if(record.reason === REASONS.CREATE_PRODUCT || (record.reason === REASONS.DELETE_LEAFLET && !isBatch) || (record.reason === REASONS.ADDED_LEAFLET && !isBatch)){
+            if(record.reason === REASONS.CREATE_PRODUCT || (record.reason === REASONS.DELETE_LEAFLET && !isBatch) || (record.reason === REASONS.ADDED_LEAFLET && !isBatch) || (record.reason.includes(REASONS.UPDATE_PRODUCT) && !isBatch)){
                 console.log(`"Creating cache for product: ${record.itemCode}`)
                 const query = `^/metadata/leaflet/.*\?gtin=${record.itemCode}$`
                 await $$.promisify(getDeactivateRelatedFixedURLHandler(getReplicasAsSmartUrls))(domain, query);
