@@ -79,7 +79,8 @@ const REASONS = {
     DELETE_LEAFLET: "Deleted Leaflet",
     CREATE_PRODUCT: "Created Product",
     ADDED_LEAFLET: "Added Leaflet",
-    UPDATE_PRODUCT: "Update Product"
+    UPDATE_PRODUCT: "Update Product",
+    UPDATED_PRODUCT: "Updated Product"
 } 
 
 const call = function(endpoints, body, callback){
@@ -216,11 +217,19 @@ const monitorCache = async () => {
             }
 
             if(record.reason === REASONS.CREATE_PRODUCT || (record.reason === REASONS.DELETE_LEAFLET && !isBatch) || (record.reason === REASONS.ADDED_LEAFLET && !isBatch) || (record.reason.includes(REASONS.UPDATE_PRODUCT) && !isBatch)){
-                console.log(`"Creating cache for product: ${record.itemCode}`)
+                console.log(`Creating cache for product: ${record.itemCode}`)
                 const query = `^/metadata/leaflet/.*\?gtin=${record.itemCode}$`
                 await $$.promisify(getDeactivateRelatedFixedURLHandler(getReplicasAsSmartUrls))(domain, query);
                 await $$.promisify(getActivateRelatedFixedURLHandler(getReplicasAsSmartUrls))(domain, query);
             }
+
+            if(record.reason === REASONS.UPDATED_PRODUCT){
+                console.log(`Refreshing cache for product: ${record.itemCode}`)
+                const query = `gtin=${record.itemCode}`
+                await $$.promisify(getDeactivateRelatedFixedURLHandler(getReplicasAsSmartUrls))(domain, query);
+                await $$.promisify(getActivateRelatedFixedURLHandler(getReplicasAsSmartUrls))(domain, query);
+            }
+
            
             console.log("Finished processing");
             console.log("------------------------------------------------------------------------");
