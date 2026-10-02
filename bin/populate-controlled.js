@@ -14,6 +14,9 @@
  *     product's languages (language -> country), so market-scoped leaflets always match
  *   - ~35% of products get a product photo (image endpoint)
  *   - ~50% of products carry 1-2 extra (non-referenced) images on their leaflets
+ *   - 2-3 update rounds (PUT) per product and per batch that change property values -
+ *     creating version history and "Updated Product"/"Updated Batch" audit entries.
+ *     Identity/consistency fields (productCode, inventedName, batchNumber, markets) are never changed.
  *   - Product-level leaflets cover every scenario:
  *       {leaflet, prescribingInfo} x {no market, each product market} for every language
  *   - Batch-level leaflets: type "leaflet" only, no market, 2-3 different languages per batch
@@ -338,6 +341,248 @@ function generateBatchFields(rand, inventedName, batchIndex) {
     return Object.fromEntries(Object.entries(batch).filter(([, v]) => v !== undefined));
 }
 
+// ---------------------------------------------------------------------------
+// Update rounds (2-3 PUTs per product/batch changing property values)
+// ---------------------------------------------------------------------------
+
+// fields that may be changed by product update rounds (never productCode/inventedName/markets)
+const PRODUCT_UPDATE_FIELDS = [
+    "internalMaterialCode", "productRecall", "flagEnableAdverseEventReporting",
+    "flagEnableACFProductCheck", "patientSpecificLeaflet", "healthcarePractitionerInfo",
+    "nameMedicinalProduct", "strengths",
+];
+
+// fields that may be changed by batch update rounds (never productCode/batchNumber)
+const BATCH_UPDATE_FIELDS = [
+    "expiryDate", "importLicenseNumber", "dateOfManufacturing", "manufacturerName",
+    "manufacturerAddress1", "manufacturerAddress2", "manufacturerAddress3",
+    "manufacturerAddress4", "manufacturerAddress5", "batchRecall", "packagingSiteName",
+    "flagEnableEXPVerification", "flagEnableExpiredEXPCheck", "batchMessage",
+    "flagEnableBatchRecallMessage", "recallMessage", "flagEnableACFBatchCheck",
+    "acfBatchCheckURL", "flagEnableSNVerification", "snValidReset", "snValid",
+];
+
+function nextProductUpdateValue(rand, field, current, inventedName) {
+    switch (field) {
+        case "internalMaterialCode": {
+            let value;
+            do {
+                value = `IMC-${rand.int(1000, 9999)}`;
+            } while (value === current);
+            return value;
+        }
+        case "productRecall":
+        case "flagEnableAdverseEventReporting":
+        case "flagEnableACFProductCheck":
+            return !current;
+        case "patientSpecificLeaflet": {
+            let value;
+            do {
+                value = rand.pick(["true", "false"]);
+            } while (value === current);
+            return value;
+        }
+        case "healthcarePractitionerInfo": {
+            let value;
+            do {
+                value = rand.pick(["available", "not available"]);
+            } while (value === current);
+            return value;
+        }
+        case "nameMedicinalProduct": {
+            let value;
+            do {
+                value = `${inventedName} ${rand.pick(STRENGTH_VALUES)} ${rand.pick(PRODUCT_FORMS)}`;
+            } while (value === current);
+            return value;
+        }
+        case "strengths": {
+            // change the strength value of one entry, or add one when the product has none
+            const strengths = JSON.parse(JSON.stringify(current || []));
+            if (strengths.length) {
+                const idx = rand.int(0, strengths.length - 1);
+                let value;
+                do {
+                    value = rand.pick(STRENGTH_VALUES);
+                } while (value === strengths[idx].strength);
+                strengths[idx].strength = value;
+            } else {
+                strengths.push({
+                    substance: rand.pick(SUBSTANCES),
+                    strength: rand.pick(STRENGTH_VALUES),
+                    ...(rand.bool(0.5) ? {legalEntityName: rand.pick(STRENGTH_LEGAL_ENTITIES)} : {}),
+                });
+            }
+            return strengths;
+        }
+        default:
+            throw new Error(`No update value generator for product field ${field}`);
+    }
+}
+
+function nextBatchUpdateValue(rand, field, current, inventedName, batchIndex, round) {
+    const differs = (value) => value !== current;
+    switch (field) {
+        case "expiryDate": {
+            let value;
+            do {
+                value = deterministicDate(rand, rand.int(12, 36));
+            } while (!differs(value));
+            return value;
+        }
+        case "dateOfManufacturing": {
+            let value;
+            do {
+                value = deterministicDate(rand, -rand.int(6, 24));
+            } while (!differs(value));
+            return value;
+        }
+        case "importLicenseNumber": {
+            let value;
+            do {
+                value = `IMP-${rand.int(10000, 99999)}`;
+            } while (!differs(value));
+            return value;
+        }
+        case "manufacturerName": {
+            let value;
+            do {
+                value = rand.pick(MAH_NAMES);
+            } while (!differs(value));
+            return value;
+        }
+        case "manufacturerAddress1": {
+            let value;
+            do {
+                value = rand.pick(ADDRESSES);
+            } while (!differs(value));
+            return value;
+        }
+        case "manufacturerAddress2": {
+            let value;
+            do {
+                value = `Floor ${rand.int(1, 9)}`;
+            } while (!differs(value));
+            return value;
+        }
+        case "manufacturerAddress3": {
+            let value;
+            do {
+                value = `Building ${rand.pick(["A", "B", "C"])}`;
+            } while (!differs(value));
+            return value;
+        }
+        case "manufacturerAddress4": {
+            let value;
+            do {
+                value = rand.pick(["Wing North", "Wing South"]);
+            } while (!differs(value));
+            return value;
+        }
+        case "manufacturerAddress5": {
+            let value;
+            do {
+                value = `Unit ${rand.int(10, 99)}`;
+            } while (!differs(value));
+            return value;
+        }
+        case "batchRecall":
+        case "flagEnableEXPVerification":
+        case "flagEnableExpiredEXPCheck":
+        case "flagEnableBatchRecallMessage":
+        case "flagEnableACFBatchCheck":
+        case "flagEnableSNVerification":
+        case "snValidReset":
+            return !current;
+        case "packagingSiteName": {
+            let value;
+            do {
+                value = rand.pick(PACKAGING_SITES);
+            } while (!differs(value));
+            return value;
+        }
+        case "batchMessage":
+            return `${inventedName} batch message (updated ${round})`;
+        case "recallMessage":
+            return `Recall notice for ${inventedName} (batch ${batchIndex}, updated ${round})`;
+        case "acfBatchCheckURL":
+            return `${ACF_URL_BASE}/batch/${batchIndex}?updated=${round}`;
+        case "snValid": {
+            let value;
+            do {
+                value = Array.from({length: rand.int(2, 5)}, () => `SN${rand.int(100000, 999999)}`);
+            } while (JSON.stringify(value) === JSON.stringify(current));
+            return value;
+        }
+        default:
+            throw new Error(`No update value generator for batch field ${field}`);
+    }
+}
+
+/** stable JSON stringify so planned values can be compared against server responses */
+function stableStringify(value) {
+    if (Array.isArray(value)) return `[${value.map(stableStringify).join(",")}]`;
+    if (value && typeof value === "object") {
+        return `{${Object.keys(value).sort().map(k => `${JSON.stringify(k)}:${stableStringify(value[k])}`).join(",")}}`;
+    }
+    return JSON.stringify(value) ?? "undefined";
+}
+
+function valuesEqual(a, b) {
+    return stableStringify(a) === stableStringify(b);
+}
+
+function generateProductUpdateRounds(rand, inventedName, fields, strengths) {
+    const state = {...fields, strengths: strengths.map(s => ({...s}))};
+    const rounds = [];
+    const count = rand.int(2, 3);
+    for (let round = 1; round <= count; round++) {
+        const changedFields = rand.sample(PRODUCT_UPDATE_FIELDS, rand.int(1, 3));
+        const changes = {};
+        for (const field of changedFields) {
+            const value = nextProductUpdateValue(rand, field, state[field], inventedName);
+            changes[field] = value;
+            state[field] = value;
+        }
+        // keep flag/URL pairs consistent: enabling a flag also (re)sets its URL
+        if (changes.flagEnableAdverseEventReporting === true) {
+            changes.adverseEventReportingURL = `${AE_URL_BASE}/${inventedName.toLowerCase()}?updated=${round}`;
+            state.adverseEventReportingURL = changes.adverseEventReportingURL;
+        }
+        if (changes.flagEnableACFProductCheck === true) {
+            changes.acfProductCheckURL = `${ACF_URL_BASE}/${inventedName.toLowerCase()}?updated=${round}`;
+            state.acfProductCheckURL = changes.acfProductCheckURL;
+        }
+        rounds.push({round, changes});
+    }
+    return {rounds, finalState: state};
+}
+
+function generateBatchUpdateRounds(rand, inventedName, batchIndex, fields) {
+    const state = {...fields};
+    const rounds = [];
+    const count = rand.int(2, 3);
+    for (let round = 1; round <= count; round++) {
+        const changedFields = rand.sample(BATCH_UPDATE_FIELDS, rand.int(1, 3));
+        const changes = {};
+        for (const field of changedFields) {
+            const value = nextBatchUpdateValue(rand, field, state[field], inventedName, batchIndex, round);
+            changes[field] = value;
+            state[field] = value;
+        }
+        if (changes.flagEnableBatchRecallMessage === true) {
+            changes.recallMessage = `Recall notice for ${inventedName} (batch ${batchIndex}, updated ${round})`;
+            state.recallMessage = changes.recallMessage;
+        }
+        if (changes.flagEnableACFBatchCheck === true) {
+            changes.acfBatchCheckURL = `${ACF_URL_BASE}/batch/${batchIndex}?updated=${round}`;
+            state.acfBatchCheckURL = changes.acfBatchCheckURL;
+        }
+        rounds.push({round, changes});
+    }
+    return {rounds, finalState: state};
+}
+
 /**
  * Builds the full dataset plan. Pure function of (seed, productCount, leafletSource contents).
  */
@@ -361,18 +606,31 @@ function buildPlan(rand, productCount, leafletSource) {
             ? `${inventedName} ${strengths[0].strength} ${rand.pick(PRODUCT_FORMS)}`
             : `${inventedName} ${rand.pick(PRODUCT_FORMS)}`;
 
+        const fields = generateProductFields(rand, inventedName);
+        // nameMedicinalProduct must be part of fields: update rounds send the full field
+        // state and the SOR requires it (422 "Required field" otherwise)
+        fields.nameMedicinalProduct = nameMedicinalProduct;
+
         const batchCount = rand.float() < 0.3 ? 1 : rand.float() < 0.75 ? 2 : 3;
         const batches = [];
         for (let b = 1; b <= batchCount; b++) {
             const batchNumber = `POP-${String(i).padStart(3, "0")}-${b}`;
             // batch leaflets: type "leaflet" only, no market, 2-3 different languages
             const batchLanguages = rand.sample(languages, Math.min(languages.length, rand.int(2, 3)));
+            const batchFields = generateBatchFields(rand, inventedName, b);
+            const {rounds: batchUpdates, finalState: batchFinal} = generateBatchUpdateRounds(rand, inventedName, b, batchFields);
             batches.push({
                 batchNumber,
-                fields: generateBatchFields(rand, inventedName, b),
+                fields: batchFields,
+                finalFields: batchFinal,
+                updates: batchUpdates,
                 leaflets: batchLanguages.map(language => ({language, type: API_MESSAGE_TYPES.EPI.LEAFLET, market: null})),
             });
         }
+
+        // 2-3 update rounds (PUT) that change property values; identity/consistency
+        // fields (productCode, inventedName, markets) are never changed
+        const {rounds: productUpdates, finalState: productFinal} = generateProductUpdateRounds(rand, inventedName, fields, strengths);
 
         // product-level leaflets: {leaflet, prescribingInfo} x {no market, each market} per language
         const productLeaflets = [];
@@ -392,7 +650,10 @@ function buildPlan(rand, productCount, leafletSource) {
             languages,
             markets: generateMarketEntries(rand, marketIds, inventedName, i),
             strengths,
-            fields: generateProductFields(rand, inventedName),
+            fields,
+            finalFields: (({strengths, ...rest}) => rest)(productFinal),
+            finalStrengths: productFinal.strengths,
+            updates: productUpdates,
             photo: photoImage ? {imageName: photoImage.name} : null,
             leafletImages: leafletImages.map(img => img.name),
             batches,
@@ -413,6 +674,8 @@ function buildPlan(rand, productCount, leafletSource) {
             batches: products.reduce((acc, p) => acc + p.batches.length, 0),
             productLeaflets: products.reduce((acc, p) => acc + p.productLeaflets.length, 0),
             batchLeaflets: products.reduce((acc, p) => acc + p.batches.reduce((a, b) => a + b.leaflets.length, 0), 0),
+            productUpdates: products.reduce((acc, p) => acc + p.updates.length, 0),
+            batchUpdates: products.reduce((acc, p) => acc + p.batches.reduce((a, b) => a + b.updates.length, 0), 0),
             photos: products.filter(p => p.photo).length,
             productsWithMarkets: products.filter(p => p.markets.length > 0).length,
             productsWithoutMarkets: products.filter(p => p.markets.length === 0).length,
@@ -485,6 +748,30 @@ function validatePlan(plan) {
             const batchLangs = new Set(b.leaflets.map(l => l.language));
             if (batchLangs.size < 2) add(`batch ${b.batchNumber}: fewer than 2 languages`);
             if (batchLangs.size > 3) add(`batch ${b.batchNumber}: more than 3 languages`);
+
+            // update rounds: 2-3 rounds, only allowed fields, each change really changes the value
+            if (b.updates.length < 2 || b.updates.length > 3) add(`batch ${b.batchNumber}: expected 2-3 update rounds`);
+            let batchState = {...b.fields};
+            for (const upd of b.updates) {
+                for (const [field, value] of Object.entries(upd.changes)) {
+                    if (!BATCH_UPDATE_FIELDS.includes(field)) add(`batch ${b.batchNumber}: update round ${upd.round} changes disallowed field ${field}`);
+                    if (valuesEqual(batchState[field], value)) add(`batch ${b.batchNumber}: update round ${upd.round} does not change ${field}`);
+                    batchState[field] = value;
+                }
+            }
+        }
+
+        // product update rounds: 2-3 rounds, only allowed fields, each change really changes the value
+        if (p.updates.length < 2 || p.updates.length > 3) add(`product ${p.inventedName}: expected 2-3 update rounds`);
+        let productState = {...p.fields, strengths: p.strengths};
+        for (const upd of p.updates) {
+            for (const [field, value] of Object.entries(upd.changes)) {
+                if (!PRODUCT_UPDATE_FIELDS.includes(field) && field !== "adverseEventReportingURL" && field !== "acfProductCheckURL") {
+                    add(`product ${p.inventedName}: update round ${upd.round} changes disallowed field ${field}`);
+                }
+                if (valuesEqual(productState[field], value)) add(`product ${p.inventedName}: update round ${upd.round} does not change ${field}`);
+                productState[field] = value;
+            }
         }
     }
 
@@ -513,7 +800,7 @@ class Populator {
         this.oauth = new OAuth(config);
         this.client = new IntegrationClient(config, "POPULATE-CONTROLLED");
         this.gtinGenerator = new GTINGenerator(config.gtin_persistence === true || config.gtin_persistence === "true");
-        this.summary = {products: 0, batches: 0, leaflets: 0, photos: 0, skipped: 0, failures: []};
+        this.summary = {products: 0, batches: 0, leaflets: 0, photos: 0, skipped: 0, updatesApplied: 0, updatesSkipped: 0, failures: []};
         // execution results, merged into the manifest
         this.execution = {products: {}, startedAt: null, finishedAt: null};
     }
@@ -595,6 +882,137 @@ class Populator {
         });
     }
 
+    /**
+     * Full product payload for an update round: planned state merged with the round changes.
+     * markets are never changed by update rounds, so the planned markets are always re-sent.
+     */
+    buildProductUpdatePayload(product, gtin, state) {
+        const {strengths, ...fields} = state;
+        return new Product({
+            productCode: gtin,
+            inventedName: product.inventedName,
+            ...fields,
+            strengths: strengths || [],
+            markets: product.markets.map(m => new Market(m).toPayload()),
+        });
+    }
+
+    buildBatchUpdatePayload(batch, gtin, state) {
+        const payload = new Batch({productCode: gtin, batchNumber: batch.batchNumber, ...state});
+        // Model.fromObject only copies fields declared on the Batch model; the remaining
+        // optional schema fields are attached as own properties so they are serialized
+        Object.assign(payload, state);
+        return payload;
+    }
+
+    /**
+     * Applies the planned update rounds to a product. Idempotent: when the server already
+     * reflects the final planned state, every round is skipped.
+     */
+    async applyProductUpdates(product, gtin, record) {
+        if (!product.updates || !product.updates.length) return;
+        record.updates = record.updates || {};
+        const changedFields = new Set(product.updates.flatMap(u => Object.keys(u.changes)));
+        let current = await this.safe(`get product ${gtin}`, async () =>
+            (await this.send((...p) => this.client.getProduct(...p), gtin)).data, null);
+
+        const finalMatches = () => {
+            if (!current) return false;
+            for (const field of changedFields) {
+                const finalValue = field === "strengths" ? product.finalStrengths : product.finalFields[field];
+                if (!valuesEqual(current[field], finalValue)) return false;
+            }
+            return true;
+        };
+
+        if (finalMatches()) {
+            for (const upd of product.updates) {
+                record.updates[`round${upd.round}`] = "skipped";
+                this.summary.updatesSkipped++;
+            }
+            return;
+        }
+
+        const state = {...product.fields, strengths: product.strengths.map(s => ({...s}))};
+        for (const upd of product.updates) {
+            const key = `round${upd.round}`;
+            const needsApply = !current || !Object.entries(upd.changes).every(([field, value]) => valuesEqual(current[field], value));
+            if (!needsApply) {
+                record.updates[key] = "skipped";
+                this.summary.updatesSkipped++;
+                continue;
+            }
+            for (const [field, value] of Object.entries(upd.changes)) {
+                state[field] = value;
+            }
+            const payload = this.buildProductUpdatePayload(product, gtin, state);
+            const ok = await this.safe(`update product ${product.inventedName} (${key})`, async () => {
+                const res = await this.send((...p) => this.client.updateProduct(...p), gtin, payload);
+                if (res.status !== 200) {
+                    throw new Error(`updateProduct status ${res.status}: ${JSON.stringify(res.data).slice(0, 200)}`);
+                }
+            });
+            record.updates[key] = ok ? "applied" : "failed";
+            if (ok) {
+                this.summary.updatesApplied++;
+                current = state; // subsequent rounds compare against the applied planned state
+            }
+        }
+    }
+
+    /**
+     * Applies the planned update rounds to one batch (same idempotency rules as products).
+     */
+    async applyBatchUpdates(product, batch, gtin, record) {
+        if (!batch.updates || !batch.updates.length) return;
+        record.updates = record.updates || {};
+        const changedFields = new Set(batch.updates.flatMap(u => Object.keys(u.changes)));
+        let current = await this.safe(`get batch ${gtin}/${batch.batchNumber}`, async () =>
+            (await this.send((...p) => this.client.getBatch(...p), gtin, batch.batchNumber)).data, null);
+
+        const finalMatches = () => {
+            if (!current) return false;
+            for (const field of changedFields) {
+                if (!valuesEqual(current[field], batch.finalFields[field])) return false;
+            }
+            return true;
+        };
+
+        if (finalMatches()) {
+            for (const upd of batch.updates) {
+                record.updates[`${batch.batchNumber}/round${upd.round}`] = "skipped";
+                this.summary.updatesSkipped++;
+            }
+            return;
+        }
+
+        const state = {...batch.fields};
+        for (const upd of batch.updates) {
+            const key = `${batch.batchNumber}/round${upd.round}`;
+            const needsApply = !current || !Object.entries(upd.changes).every(([field, value]) => valuesEqual(current[field], value));
+            if (!needsApply) {
+                record.updates[key] = "skipped";
+                this.summary.updatesSkipped++;
+                continue;
+            }
+            for (const [field, value] of Object.entries(upd.changes)) {
+                state[field] = value;
+            }
+            const payload = this.buildBatchUpdatePayload(batch, gtin, state);
+            const ok = await this.safe(`update batch ${product.inventedName}/${batch.batchNumber} (${key})`, async () => {
+                const res = await this.send((...p) => this.client.updateBatch(...p), gtin, batch.batchNumber, payload);
+                if (res.status !== 200) {
+                    throw new Error(`updateBatch status ${res.status}: ${JSON.stringify(res.data).slice(0, 200)}`);
+                }
+            });
+            record.updates[key] = ok ? "applied" : "failed";
+            if (ok) {
+                this.summary.updatesApplied++;
+                current = state;
+            }
+        }
+    }
+
     async safe(label, fn) {
         try {
             await fn();
@@ -646,9 +1064,9 @@ class Populator {
     }
 
     async populateProduct(product) {
-        const record = {status: "ok", gtin: null, reused: false, batches: {}, leaflets: {}, photo: null};
+        const record = {status: "ok", gtin: null, reused: false, batches: {}, leaflets: {}, updates: {}, photo: null};
 
-        console.log(`\n[${product.index}/${this.plan.counts.products}] "${product.inventedName}" - languages [${product.languages.join(", ")}], markets [${product.markets.map(m => m.marketId).join(", ") || "none"}], ${product.batches.length} batch(es), ${product.strengths.length} strength(s)${product.photo ? ", photo" : ""}`);
+        console.log(`\n[${product.index}/${this.plan.counts.products}] "${product.inventedName}" - languages [${product.languages.join(", ")}], markets [${product.markets.map(m => m.marketId).join(", ") || "none"}], ${product.batches.length} batch(es), ${product.strengths.length} strength(s)${product.photo ? ", photo" : ""}, ${product.updates.length} update round(s)`);
 
         // 1. product (create or reuse by invented name)
         const existingGtins = this.existingProductsByName[product.inventedName] || [];
@@ -725,6 +1143,9 @@ class Populator {
             if (ok) this.summary.photos++;
         }
 
+        // 3.5 product updates (2-3 rounds changing property values)
+        await this.applyProductUpdates(product, gtin, record);
+
         // 4. batches (create or reuse)
         const existingBatches = (this.existingBatchesByGtin[gtin] || []);
         for (const batch of product.batches) {
@@ -776,6 +1197,12 @@ class Populator {
             }
         }
 
+        // 5.5 batch updates (2-3 rounds changing property values)
+        for (const batch of product.batches) {
+            if (record.batches[batch.batchNumber] === "failed") continue;
+            await this.applyBatchUpdates(product, batch, gtin, record);
+        }
+
         this.execution.products[product.inventedName] = record;
     }
 
@@ -813,6 +1240,7 @@ function writeManifest(args, plan, execution, summary) {
             products: "2-3 languages (en+fr always, 3rd random), 1-3 batches, 0-3 strengths, 0-2 markets (30% none)",
             productLeaflets: "{leaflet, prescribingInfo} x {no-market, each product market} per language",
             batchLeaflets: "type leaflet only, no market, 2-3 languages per batch",
+            updates: "2-3 PUT rounds per product and batch changing property values (never productCode/inventedName/batchNumber/markets); finalFields/finalStrengths hold the expected final state",
             optionalFields: "every optional product/batch/market property filled independently at random",
         },
         source: plan.source,
@@ -886,7 +1314,7 @@ function parseArgs(argv) {
         photos: plan.products.filter(p => p.photo).length,
     };
     validatePlan(plan);
-    console.log(`Plan generated and validated: ${plan.counts.products} products, ${plan.counts.batches} batches, ${plan.counts.productLeaflets} product leaflets, ${plan.counts.batchLeaflets} batch leaflets, ${plan.counts.photos} photos`);
+    console.log(`Plan generated and validated: ${plan.counts.products} products, ${plan.counts.batches} batches, ${plan.counts.productLeaflets} product leaflets, ${plan.counts.batchLeaflets} batch leaflets, ${plan.counts.productUpdates} product update rounds, ${plan.counts.batchUpdates} batch update rounds, ${plan.counts.photos} photos`);
     console.log(`Scenario coverage: ${plan.counters.productsNoMarkets} product(s) without markets, ${plan.counters.productsNoStrengths} without strengths, ${plan.counters.productsMaxStrengths} with 3 strengths, ${plan.counters.photos} with photo`);
 
     if (args.dryRun) {
@@ -910,6 +1338,8 @@ function parseArgs(argv) {
     console.log(`Batches created:    ${populator.summary.batches}`);
     console.log(`Leaflets uploaded:  ${populator.summary.leaflets}`);
     console.log(`Photos uploaded:    ${populator.summary.photos}`);
+    console.log(`Updates applied:    ${populator.summary.updatesApplied}`);
+    console.log(`Updates skipped:    ${populator.summary.updatesSkipped}`);
     console.log(`Skipped (existing): ${populator.summary.skipped}`);
     if (populator.summary.failures.length) {
         console.log(`Failures (${populator.summary.failures.length}):`);

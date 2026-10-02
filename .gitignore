@@ -75,6 +75,14 @@ browserstack.yml
 workdocs/populate-manifest*.json
 workdocs/populate-run*.log
 
+# inventory.js artifacts
+workdocs/inventory-*.json
+workdocs/inventory-*.md
+
+# sor-data-model.js artifacts
+workdocs/sor-data-model-*.json
+workdocs/sor-data-model-*.md
+
 # Playwright
 /test-results/
 /playwright-report/

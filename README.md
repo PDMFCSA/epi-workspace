@@ -334,6 +334,7 @@ The full default dataset (100 products) uploads roughly 1,700 records and takes 
 - 100 products (configurable), each with 2-3 languages (`en` + `fr` always, a 3rd language randomly), 1-3 batches, 0-3 strengths and 0-2 markets (some products intentionally have no market)
 - Product-level leaflets covering every scenario: `{leaflet, prescribingInfo} x {no market, each product market}` for every language
 - Batch-level leaflets: type `leaflet` only, no market, 2-3 different languages per batch
+- 2-3 update rounds (PUT) per product and per batch that change property values, creating version history and `Updated Product`/`Updated Batch` audit entries; the manifest records every round and the expected final state (`finalFields`/`finalStrengths`)
 - Some products have a product photo and/or extra images attached to their leaflets
 - Every optional product/batch/market property is filled randomly, so all combinations appear across the dataset
 
