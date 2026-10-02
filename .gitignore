@@ -71,6 +71,10 @@ tests/config/test.config.json
 browserstack.yml
 .gtin-counter.lock
 
+# populate-controlled.js artifacts
+workdocs/populate-manifest*.json
+workdocs/populate-run*.log
+
 # Playwright
 /test-results/
 /playwright-report/
